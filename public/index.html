@@ -928,7 +928,7 @@
     <div class="modal-overlay" id="cloud-sync-modal" onclick="if(event.target===this) closeCloudSyncModal()">
         <div class="modal-content">
             <div class="modal-title">☁️ 私人云同步</div>
-            <div class="cloud-sync-intro">登录同一账号后会自动同步云端记录</div>
+            <div class="cloud-sync-intro">登录同一账号后自动以云端最新记录为准</div>
 
             <div id="cloud-auth-panel">
                 <div class="form-row">
@@ -974,19 +974,11 @@
             <div id="cloud-account-panel" class="cloud-hidden">
                 <div class="cloud-account">
                     <div class="cloud-account-name" id="cloud-account-name">已登录</div>
-                    <div class="cloud-account-note">本机修改会自动上传；回到本页面时会检查其他设备的新记录。</div>
+                    <div class="cloud-account-note">云端记录为准；本机操作会自动上传，回到本页面时会读取云端最新记录。</div>
                 </div>
                 <div class="cloud-button-grid">
                     <button class="primary-btn" onclick="syncCloudNow()">立即同步</button>
                     <button class="primary-btn ghost-btn" onclick="logoutCloudUser()">退出云同步</button>
-                </div>
-                <div class="cloud-conflict cloud-hidden" id="cloud-conflict-panel">
-                    <div class="cloud-conflict-title">检测到两台设备同时修改</div>
-                    <div class="cloud-conflict-copy">请选择要保留的版本。操作前，本机版本会留一份安全副本。</div>
-                    <div class="cloud-button-grid">
-                        <button class="primary-btn" onclick="useCloudVersion()">使用云端版本</button>
-                        <button class="primary-btn ghost-btn" onclick="overwriteCloudVersion()">使用本机版本</button>
-                    </div>
                 </div>
                 <div class="modal-actions">
                     <button class="primary-btn ghost-btn" onclick="closeCloudSyncModal()">关闭</button>
@@ -1125,7 +1117,6 @@
         let cloudSyncTimer = null;
         let cloudSyncing = false;
         let cloudApplying = false;
-        let cloudConflictData = null;
         let cloudResetMode = false;
         let lastCloudPullAt = 0;
 
@@ -1174,22 +1165,41 @@
             return data;
         }
 
+        function createEmptyCloudData() {
+            return {
+                ddHistoryData: {},
+                ddTodos: {},
+                ddRecentGoals: [],
+                ddCheckins: {},
+                ddHealthData: {},
+                ddAlmanacRecords: {},
+                ddAppSettings: {}
+            };
+        }
+
+        function replaceLocalCloudCache(data) {
+            DATA_STORAGE_KEYS.forEach(key => localStorage.setItem(key, JSON.stringify(data[key])));
+        }
+
+        function clearLocalCloudCache() {
+            DATA_STORAGE_KEYS.forEach(key => localStorage.removeItem(key));
+            localStorage.removeItem(CLOUD_REVISION_KEY);
+            localStorage.removeItem(CLOUD_DIRTY_KEY);
+            localStorage.removeItem(CLOUD_SAFETY_BACKUP_KEY);
+        }
+
+        function cloudDataMatchesLocal(data) {
+            return DATA_STORAGE_KEYS.every(key => JSON.stringify(
+                safeJSON(localStorage.getItem(key), DATA_STORAGE_DEFAULTS[key])
+            ) === JSON.stringify(data[key]));
+        }
+
         function isValidCloudData(data) {
             if (!isPlainObject(data)) return false;
             return DATA_STORAGE_KEYS.every(key => {
                 const value = data[key];
                 return key === 'ddRecentGoals' ? Array.isArray(value) : isPlainObject(value);
             });
-        }
-
-        function saveCloudSafetyBackup(reason) {
-            try {
-                localStorage.setItem(CLOUD_SAFETY_BACKUP_KEY, JSON.stringify({
-                    savedAt: new Date().toISOString(),
-                    reason: reason || 'cloud-sync',
-                    data: captureCloudData()
-                }));
-            } catch (_) {}
         }
 
         function setCloudStatus(state, message) {
@@ -1217,7 +1227,6 @@
             document.getElementById('cloud-auth-panel')?.classList.toggle('cloud-hidden', loggedIn || cloudResetMode);
             document.getElementById('cloud-reset-panel')?.classList.toggle('cloud-hidden', loggedIn || !cloudResetMode);
             document.getElementById('cloud-account-panel')?.classList.toggle('cloud-hidden', !loggedIn);
-            document.getElementById('cloud-conflict-panel')?.classList.toggle('cloud-hidden', !cloudConflictData);
             const name = document.getElementById('cloud-account-name');
             if (name && loggedIn) name.textContent = '已登录：' + cloudSession.username;
         }
@@ -1284,7 +1293,6 @@
             };
             cloudRevision = 0;
             cloudDirty = false;
-            cloudConflictData = null;
             localStorage.setItem(CLOUD_SESSION_KEY, JSON.stringify(cloudSession));
             localStorage.setItem(CLOUD_REVISION_KEY, '0');
             localStorage.removeItem(CLOUD_DIRTY_KEY);
@@ -1295,7 +1303,6 @@
             cloudSession = null;
             cloudRevision = 0;
             cloudDirty = false;
-            cloudConflictData = null;
             cloudResetMode = false;
             localStorage.removeItem(CLOUD_SESSION_KEY);
             localStorage.removeItem(CLOUD_REVISION_KEY);
@@ -1306,7 +1313,9 @@
 
         function handleCloudError(error, quiet = false) {
             if (error?.status === 401 && cloudSession) {
+                clearLocalCloudCache();
                 clearCloudSession('登录已失效，请重新登录');
+                setTimeout(() => location.reload(), 350);
             } else {
                 setCloudStatus('error', error?.message || '云同步暂时不可用，请稍后重试');
             }
@@ -1314,17 +1323,15 @@
         }
 
         function applyCloudSnapshot(data, revision, reason) {
-            if (!isValidCloudData(data)) throw new Error('云端数据格式不完整，未覆盖本机记录');
-            saveCloudSafetyBackup(reason || 'before-cloud-download');
+            if (!isValidCloudData(data)) throw new Error('云端数据格式不完整');
             cloudApplying = true;
-            DATA_STORAGE_KEYS.forEach(key => localStorage.setItem(key, JSON.stringify(data[key])));
+            replaceLocalCloudCache(data);
             cloudRevision = Number(revision || 0);
             cloudDirty = false;
-            cloudConflictData = null;
             localStorage.setItem(CLOUD_REVISION_KEY, String(cloudRevision));
             localStorage.removeItem(CLOUD_DIRTY_KEY);
-            setCloudStatus('online', '已下载云端最新记录，正在刷新页面');
-            showToast('云端记录已同步到本机');
+            setCloudStatus('online', '已采用云端最新记录，正在刷新页面');
+            showToast('已采用云端最新记录');
             setTimeout(() => location.reload(), 350);
         }
 
@@ -1339,7 +1346,6 @@
                 });
                 cloudRevision = Number(payload.revision || cloudRevision + 1);
                 cloudDirty = false;
-                cloudConflictData = null;
                 localStorage.setItem(CLOUD_REVISION_KEY, String(cloudRevision));
                 localStorage.removeItem(CLOUD_DIRTY_KEY);
                 renderCloudPanel();
@@ -1347,10 +1353,11 @@
                 return true;
             } catch (error) {
                 if (error?.code === 'revision_conflict') {
-                    cloudConflictData = error.payload || { revision: cloudRevision + 1 };
-                    renderCloudPanel();
-                    setCloudStatus('conflict', '其他设备已有新记录，请选择保留云端或本机版本');
-                    openCloudSyncModal();
+                    cloudDirty = false;
+                    localStorage.removeItem(CLOUD_DIRTY_KEY);
+                    setCloudStatus('syncing', '云端已有更新，正在自动采用云端记录…');
+                    cloudSyncing = false;
+                    await pullCloudData(true, true);
                 } else {
                     handleCloudError(error);
                 }
@@ -1369,20 +1376,28 @@
                 const remoteRevision = Number(payload.revision || 0);
                 lastCloudPullAt = Date.now();
                 if (remoteRevision === 0 && !isValidCloudData(payload.data)) {
+                    const emptyData = createEmptyCloudData();
+                    replaceLocalCloudCache(emptyData);
                     cloudSyncing = false;
                     cloudDirty = true;
                     localStorage.setItem(CLOUD_DIRTY_KEY, '1');
-                    return pushCloudData(true);
+                    const initialized = await pushCloudData(true);
+                    if (initialized) setTimeout(() => location.reload(), 250);
+                    return initialized;
                 }
-                if ((force || remoteRevision > cloudRevision) && isValidCloudData(payload.data)) {
-                    if (cloudDirty && !force) {
-                        cloudConflictData = payload;
-                        renderCloudPanel();
-                        setCloudStatus('conflict', '本机和云端都有新记录，请选择要保留的版本');
-                        openCloudSyncModal();
-                        return false;
+                if (!isValidCloudData(payload.data)) throw new Error('云端数据格式不完整');
+                const localMatchesCloud = cloudDataMatchesLocal(payload.data);
+                const shouldAdoptCloud = force || remoteRevision !== cloudRevision || (!localMatchesCloud && !cloudDirty);
+                if (shouldAdoptCloud) {
+                    cloudDirty = false;
+                    localStorage.removeItem(CLOUD_DIRTY_KEY);
+                    if (!localMatchesCloud) {
+                        applyCloudSnapshot(payload.data, remoteRevision, 'cloud-authoritative');
+                        return true;
                     }
-                    applyCloudSnapshot(payload.data, remoteRevision, 'before-cloud-download');
+                    cloudRevision = remoteRevision;
+                    localStorage.setItem(CLOUD_REVISION_KEY, String(cloudRevision));
+                    setCloudStatus('online', '已采用云端最新记录 · 云端版本 ' + cloudRevision);
                     return true;
                 }
                 if (cloudDirty) {
@@ -1423,10 +1438,14 @@
                     body: JSON.stringify({ username, password, inviteCode })
                 });
                 storeCloudSession(payload);
+                replaceLocalCloudCache(createEmptyCloudData());
                 cloudDirty = true;
                 localStorage.setItem(CLOUD_DIRTY_KEY, '1');
                 const uploaded = await pushCloudData(true);
-                if (uploaded) showToast('注册成功，本机记录已安全上传');
+                if (uploaded) {
+                    showToast('注册成功，已创建空白云端记录');
+                    setTimeout(() => location.reload(), 350);
+                }
                 document.getElementById('cloud-password').value = '';
                 document.getElementById('cloud-invite-code').value = '';
             } catch (error) {
@@ -1445,7 +1464,6 @@
             }
             setCloudAuthBusy(true);
             setCloudStatus('syncing', '正在登录并读取云端记录…');
-            saveCloudSafetyBackup('before-cloud-login');
             try {
                 const payload = await cloudApi('/login', {
                     method: 'POST',
@@ -1471,7 +1489,6 @@
             }
             setCloudAuthBusy(true);
             setCloudStatus('syncing', '正在重设密码…');
-            saveCloudSafetyBackup('before-password-reset');
             try {
                 const payload = await cloudApi('/reset-password', {
                     method: 'POST',
@@ -1492,12 +1509,14 @@
 
         async function logoutCloudUser() {
             if (!cloudSession) return;
-            const confirmed = window.confirm('退出后本机记录仍会保留，但不会再自动同步。确定退出吗？');
+            const confirmed = window.confirm('退出后将清除本设备上的记录缓存，云端数据不会删除。确定退出吗？');
             if (!confirmed) return;
             try { await cloudApi('/logout', { method: 'POST' }); } catch (_) {}
-            clearCloudSession('已退出；本机记录仍保留');
+            clearLocalCloudCache();
+            clearCloudSession('已退出；本机缓存已清除');
             closeCloudSyncModal();
-            showToast('已退出云同步，本机记录未删除');
+            showToast('已退出，云端记录仍安全保留');
+            setTimeout(() => location.reload(), 350);
         }
 
         function syncCloudNow() {
@@ -1505,29 +1524,26 @@
             else pullCloudData(false);
         }
 
-        function useCloudVersion() {
-            if (!window.confirm('将使用云端版本覆盖本机。系统会先保留一份本机安全副本，确定继续吗？')) return;
-            pullCloudData(true);
-        }
-
-        function overwriteCloudVersion() {
-            if (!window.confirm('将使用本机版本覆盖云端，其他设备下次同步后也会采用本机版本。确定继续吗？')) return;
-            saveCloudSafetyBackup('before-force-cloud-upload');
-            pushCloudData(true);
-        }
-
         function initializeCloudSync() {
             cloudSession = safeJSON(localStorage.getItem(CLOUD_SESSION_KEY), null);
             cloudRevision = Math.max(0, Number(localStorage.getItem(CLOUD_REVISION_KEY) || 0));
-            cloudDirty = localStorage.getItem(CLOUD_DIRTY_KEY) === '1';
+            cloudDirty = false;
+            localStorage.removeItem(CLOUD_DIRTY_KEY);
+            localStorage.removeItem(CLOUD_SAFETY_BACKUP_KEY);
             const expired = cloudSession?.expiresAt && cloudSession.expiresAt <= Math.floor(Date.now() / 1000);
-            if (!cloudSession?.token || expired) {
-                clearCloudSession(expired ? '登录已过期，请重新登录' : '尚未登录云同步');
+            if (expired) {
+                clearLocalCloudCache();
+                clearCloudSession('登录已过期，请重新登录');
+                setTimeout(() => location.reload(), 350);
+                return;
+            }
+            if (!cloudSession?.token) {
+                clearCloudSession('尚未登录云同步');
                 return;
             }
             renderCloudPanel();
-            setCloudStatus('online', cloudDirty ? '本机有待上传的修改' : '已登录，正在检查云端记录');
-            setTimeout(() => pullCloudData(false, true), 300);
+            setCloudStatus('online', '已登录，正在读取云端最新记录');
+            setTimeout(() => pullCloudData(true, true), 300);
         }
 
         function clearAllRecordsOnce() {
@@ -1582,14 +1598,23 @@
                 return;
             }
             const reader = new FileReader();
-            reader.onload = () => {
+            reader.onload = async () => {
                 try {
                     const backup = JSON.parse(String(reader.result || ''));
                     if (!isValidBackup(backup)) throw new Error('invalid backup');
+                    if (!cloudSession) {
+                        showToast('请先登录云同步账号，再导入数据');
+                        openCloudSyncModal();
+                        return;
+                    }
                     if (!window.confirm('导入会覆盖当前全部记录和设置，确定继续吗？')) return;
                     applyImportedData(backup);
-                    showToast('数据导入成功，正在刷新页面');
-                    setTimeout(() => window.location.reload(), 700);
+                    showToast('正在将导入数据写入云端…');
+                    const uploaded = await pushCloudData(true);
+                    if (uploaded) {
+                        showToast('数据已导入并保存到云端，正在刷新页面');
+                        setTimeout(() => window.location.reload(), 500);
+                    }
                 } catch (_) {
                     showToast('导入失败：请选择由本系统导出的 JSON 备份文件');
                 }
