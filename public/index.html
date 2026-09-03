@@ -1,0 +1,2130 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="app-name" content="小帅博士">
+    <title>小帅博士自律打卡系统</title>
+    <style>
+        :root {
+            --primary-color: #3498db;
+            --primary-dark: #2477b3;
+            --primary-soft: #eaf5fd;
+            --bg-color: #f0f8ff;
+            --card-bg: #ffffff;
+            --text-color: #2c3e50;
+            --muted-color: #7f8c9a;
+            --success-color: #27ae60;
+            --danger-color: #e74c3c;
+            --border-color: #d6eaf8;
+            --shadow: 0 8px 28px rgba(52, 152, 219, 0.08);
+        }
+
+        * { box-sizing: border-box; }
+        body {
+            margin: 0;
+            min-height: 100vh;
+            display: flex;
+            background: var(--bg-color);
+            color: var(--text-color);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        }
+        button, input, select { font: inherit; }
+        button { -webkit-tap-highlight-color: transparent; }
+
+        .sidebar {
+            width: 240px;
+            min-height: 100vh;
+            flex: 0 0 240px;
+            padding: 30px 20px;
+            background: var(--card-bg);
+            border-right: 1px solid var(--border-color);
+            position: sticky;
+            top: 0;
+            align-self: flex-start;
+            display: flex;
+            flex-direction: column;
+        }
+        .logo {
+            margin-bottom: 40px;
+            color: var(--primary-color);
+            font-size: 22px;
+            font-weight: 800;
+            line-height: 1.3;
+            cursor: pointer;
+            border-radius: 10px;
+            padding: 8px 10px;
+            margin-left: -10px;
+            transition: background .2s, transform .2s;
+        }
+        .logo:hover { background: var(--primary-soft); transform: translateY(-1px); }
+        .logo-subtitle { font-size: 14px; font-weight: 400; opacity: .8; }
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 15px 18px;
+            margin-bottom: 10px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 15px;
+            transition: all .2s;
+            user-select: none;
+        }
+        .nav-item:hover { background: var(--primary-soft); }
+        .nav-item.active {
+            background: var(--primary-color);
+            color: #fff;
+            box-shadow: 0 6px 18px rgba(52, 152, 219, .24);
+        }
+        .sidebar-tools { margin-top: auto; padding-top: 18px; border-top: 1px solid var(--border-color); display: grid; gap: 8px; }
+        .sidebar-tool-btn { width: 100%; padding: 10px 12px; border: 1px solid var(--border-color); border-radius: 9px; background: var(--bg-color); color: var(--text-color); cursor: pointer; font-size: 13px; text-align: left; }
+        .sidebar-tool-btn:hover { border-color: var(--primary-color); background: var(--primary-soft); }
+        .hidden-file-input { display: none; }
+
+        .main-content { flex: 1; min-width: 0; padding: 30px 40px 50px; }
+        .page.hidden { display: none; }
+
+        .header-info {
+            display: grid;
+            grid-template-columns: 390px minmax(0, 1fr);
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        .time-card, .countdown-card, .card, .life-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            box-shadow: var(--shadow);
+        }
+        .time-card {
+            min-height: 164px;
+            padding: 18px;
+            border-radius: 16px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+        }
+        .current-time {
+            color: var(--primary-color);
+            font: 800 29px/1.1 "SFMono-Regular", Consolas, monospace;
+        }
+        .current-date { margin-top: 7px; color: var(--muted-color); font-size: 12px; }
+        .almanac-box {
+            margin-top: 9px;
+            padding-top: 9px;
+            width: 100%;
+            border-top: 1px dashed var(--border-color);
+            display: grid;
+            gap: 6px;
+            text-align: left;
+        }
+        .almanac-row { display: flex; align-items: flex-start; gap: 7px; color: #5f7487; font-size: 12px; line-height: 1.45; }
+        .almanac-badge { width: 22px; height: 22px; flex: 0 0 22px; display: grid; place-items: center; border-radius: 6px; color: #fff; font-weight: 800; }
+        .almanac-row.yi .almanac-badge { background: var(--success-color); }
+        .almanac-row.ji .almanac-badge { background: var(--danger-color); }
+        .almanac-text { display: -webkit-box; overflow: hidden; -webkit-box-orient: vertical; -webkit-line-clamp: 2; }
+        .almanac-source { color: #a2afb8; font-size: 10px; text-align: right; }
+        .countdown-grid { display: flex; flex-wrap: wrap; gap: 15px; }
+        .custom-countdown-cards { display: contents; }
+        .countdown-card {
+            flex: 1 1 130px;
+            min-width: 0;
+            padding: 20px 14px;
+            border-radius: 16px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+        }
+        .cd-label { margin-bottom: 8px; color: var(--muted-color); font-size: 13px; }
+        .cd-val { color: var(--text-color); font-size: 22px; font-weight: 800; }
+        .custom-countdown-card { cursor: pointer; }
+        .custom-countdown-card:hover { border-color: var(--primary-color); transform: translateY(-1px); }
+        .add-countdown-card { flex: 0 0 58px; min-width: 58px; padding: 0; color: var(--primary-color); font-size: 32px; font-weight: 400; cursor: pointer; }
+        .add-countdown-card:hover { border-color: var(--primary-color); background: var(--primary-soft); }
+        .add-countdown-card:disabled { color: #b6c1c9; cursor: not-allowed; opacity: .65; }
+        .add-countdown-card:disabled:hover { border-color: var(--border-color); background: var(--card-bg); }
+
+        .card { padding: 25px; margin-bottom: 25px; border-radius: 16px; }
+        .card-title {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            margin-bottom: 20px;
+            font-size: 18px;
+            font-weight: 800;
+        }
+        .checkin-container { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+        .checkin-item { padding: 20px; border-radius: 13px; background: var(--bg-color); text-align: center; }
+        .checkin-icon { margin-bottom: 10px; font-size: 40px; }
+        .checkin-name { font-weight: 800; }
+        .checkin-deadline { margin: 5px 0 15px; color: var(--muted-color); font-size: 12px; }
+        .status-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; }
+        .status-panel { padding: 22px; border-radius: 13px; background: var(--bg-color); text-align: center; }
+        .status-label { margin-bottom: 8px; color: var(--muted-color); font-size: 12px; }
+        .status-value { color: var(--primary-color); font-size: 34px; font-weight: 850; }
+        .status-unit { margin-left: 4px; color: var(--muted-color); font-size: 14px; }
+        .status-detail { margin-top: 5px; color: #a0adb6; font-size: 12px; }
+        .primary-btn {
+            border: 0;
+            border-radius: 9px;
+            padding: 10px 20px;
+            background: var(--primary-color);
+            color: #fff;
+            font-weight: 650;
+            cursor: pointer;
+            transition: transform .12s, opacity .2s, box-shadow .2s;
+        }
+        .primary-btn:hover:not(:disabled) { box-shadow: 0 5px 12px rgba(52, 152, 219, .22); transform: translateY(-1px); }
+        .primary-btn:active:not(:disabled) { transform: scale(.98); }
+        .primary-btn:disabled { background: #c9d5dd; cursor: not-allowed; box-shadow: none; }
+        .danger-btn { background: var(--danger-color); }
+        .ghost-btn { background: #fff; color: var(--primary-dark); border: 1px solid var(--border-color); }
+
+        .plan-grid { display: grid; grid-template-columns: 310px minmax(0, 1fr); gap: 22px; }
+        .calendar-container { padding: 16px; border-radius: 13px; background: var(--bg-color); }
+        .cal-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; font-weight: 800; }
+        .icon-btn { padding: 5px 7px; border: 0; background: transparent; color: var(--text-color); cursor: pointer; }
+        .icon-btn:hover { color: var(--primary-color); }
+        .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; text-align: center; }
+        .cal-day-name { padding-bottom: 5px; color: var(--muted-color); font-size: 11px; }
+        .cal-day { position: relative; padding: 8px 0; border-radius: 7px; font-size: 12px; }
+        .cal-day.today { background: var(--primary-color); color: #fff; font-weight: 800; }
+        .cal-day.has-todo:not(.today)::after {
+            content: "";
+            width: 4px;
+            height: 4px;
+            position: absolute;
+            bottom: 2px;
+            left: 50%;
+            transform: translateX(-50%);
+            border-radius: 50%;
+            background: var(--danger-color);
+        }
+        .cal-day.other-month { opacity: .2; }
+
+        .goal-panel { min-width: 0; }
+        .section-label {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            color: var(--muted-color);
+            font-size: 14px;
+        }
+        .todo-section { margin-top: 22px; }
+        .todo-input-group { display: flex; gap: 10px; margin-bottom: 14px; }
+        .todo-input {
+            flex: 1;
+            min-width: 0;
+            padding: 12px 14px;
+            border: 1px solid #dcebf5;
+            border-radius: 9px;
+            outline: none;
+            background: var(--bg-color);
+            color: var(--text-color);
+        }
+        .todo-input:focus { border-color: var(--primary-color); background: #fff; }
+        .todo-list { margin: 0; padding: 0; list-style: none; }
+        .todo-item {
+            display: flex;
+            align-items: center;
+            min-height: 46px;
+            margin-bottom: 8px;
+            padding: 11px 14px;
+            border: 1px solid #edf3f7;
+            border-radius: 9px;
+            background: #fff;
+            cursor: pointer;
+            transition: border-color .2s, transform .2s;
+        }
+        .todo-item:hover { border-color: var(--primary-color); transform: translateX(2px); }
+        .custom-checkbox {
+            width: 20px;
+            height: 20px;
+            flex: 0 0 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 13px;
+            border: 2px solid #cdd9e1;
+            border-radius: 50%;
+        }
+        .todo-item.completed .custom-checkbox { background: var(--success-color); border-color: var(--success-color); }
+        .todo-item.completed .custom-checkbox::after { content: "✓"; color: #fff; font-size: 12px; font-weight: 800; }
+        .todo-item.completed .todo-text { color: #a5b0b8; text-decoration: line-through; }
+        .todo-text { flex: 1; min-width: 0; overflow-wrap: anywhere; font-size: 14px; }
+        .todo-item.completed-record { cursor: default; }
+        .todo-item.completed-record:hover { transform: none; }
+        .record-mark { width: 24px; flex: 0 0 24px; margin-right: 10px; color: var(--success-color); font-weight: 900; text-align: center; }
+        .todo-delete { padding: 3px 6px; color: #cbd4da; cursor: pointer; opacity: 0; transition: .2s; }
+        .todo-item:hover .todo-delete { opacity: 1; }
+        .todo-delete:hover { color: var(--danger-color); transform: scale(1.18); }
+        .empty-state { padding: 18px; border: 1px dashed var(--border-color); border-radius: 10px; color: #99a9b5; text-align: center; font-size: 13px; }
+
+        .life-grid {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(270px, 1fr));
+            gap: 20px;
+            align-items: stretch;
+        }
+        .life-card {
+            min-width: 0;
+            min-height: 590px;
+            padding: 24px;
+            border-radius: 16px;
+            display: flex;
+            flex-direction: column;
+        }
+        .life-card .card-title { justify-content: center; }
+        .sport-options { display: grid; grid-template-columns: repeat(2, 1fr); gap: 9px; margin-bottom: 25px; }
+        .sport-option {
+            padding: 10px 8px;
+            border: 1px solid var(--border-color);
+            border-radius: 9px;
+            background: var(--primary-soft);
+            color: var(--text-color);
+            cursor: pointer;
+        }
+        .sport-option.active { background: var(--primary-color); color: #fff; border-color: var(--primary-color); }
+        .mono-display { color: var(--primary-color); font: 800 34px/1.2 "SFMono-Regular", Consolas, monospace; text-align: center; }
+        .button-row { display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; }
+        .manual-entry { margin-top: auto; padding-top: 20px; border-top: 1px solid var(--border-color); text-align: center; }
+        .number-input { width: 160px; padding: 10px; border: 1px solid #d7e3ea; border-radius: 8px; outline: none; }
+        .number-input:focus { border-color: var(--primary-color); }
+
+        .timer-modes { display: flex; justify-content: center; gap: 8px; flex-wrap: wrap; }
+        .timer-mode { padding: 8px 12px; }
+        .timer-ring {
+            --timer-progress: 0deg;
+            width: 214px;
+            height: 214px;
+            margin: 32px auto 28px;
+            border-radius: 50%;
+            background: conic-gradient(var(--primary-color) var(--timer-progress), #e8f0f5 0deg);
+            display: grid;
+            place-items: center;
+            position: relative;
+        }
+        .timer-ring::before { content: ""; width: 172px; height: 172px; border-radius: 50%; background: #fff; position: absolute; }
+        .timer-ring .mono-display { position: relative; z-index: 1; font-size: 42px; }
+        .timer-note { margin-top: 20px; color: var(--muted-color); font-size: 12px; text-align: center; }
+
+        .health-list { display: flex; flex-direction: column; gap: 11px; }
+        .health-row {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 14px 15px;
+            border: 1px solid var(--border-color);
+            border-radius: 11px;
+            background: var(--primary-soft);
+            color: var(--text-color);
+            cursor: pointer;
+        }
+        .health-row.done { background: #eaf8f0; border-color: #bfe7cf; }
+        .health-check { width: 24px; height: 24px; display: grid; place-items: center; border: 2px solid #b9cbd8; border-radius: 50%; background: #fff; }
+        .health-row.done .health-check { border-color: var(--success-color); background: var(--success-color); color: #fff; }
+        .mood-box { margin-top: 14px; padding: 16px 15px 18px; border: 1px solid var(--border-color); border-radius: 11px; background: var(--primary-soft); }
+        .mood-heading { display: flex; align-items: center; justify-content: space-between; margin-bottom: 15px; }
+        .mood-score { color: var(--primary-color); font-weight: 800; }
+        .mood-slider { width: 100%; accent-color: var(--primary-color); cursor: grab; }
+        .mood-slider:active { cursor: grabbing; }
+        .mood-ends { display: flex; justify-content: space-between; margin-top: 6px; color: var(--muted-color); font-size: 12px; }
+        .health-tip { margin-top: auto; padding-top: 18px; color: var(--muted-color); font-size: 12px; line-height: 1.6; text-align: center; }
+
+        .stats-toolbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+        .month-picker { padding: 8px 10px; border: 1px solid var(--border-color); border-radius: 9px; color: var(--text-color); background: #fff; }
+        .stats-scroll { overflow-x: auto; padding-bottom: 6px; }
+        .stats-calendar { min-width: 1180px; display: grid; grid-template-columns: repeat(7, minmax(160px, 1fr)); align-items: start; gap: 10px; }
+        .stats-weekday { padding: 12px 9px; color: var(--text-color); font-size: 15px; font-weight: 850; text-align: center; }
+        .stats-day {
+            padding: 10px;
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            background: #fff;
+            box-shadow: 0 3px 11px rgba(52, 152, 219, .045);
+            display: flex;
+            flex-direction: column;
+        }
+        .stats-day.blank { height: 90px; background: rgba(255,255,255,.35); border-style: dashed; box-shadow: none; }
+        .stats-day.future { opacity: .55; }
+        .stats-day.editing { border-color: var(--primary-color); box-shadow: 0 0 0 2px rgba(52,152,219,.12); }
+        .stats-date { display: flex; align-items: center; justify-content: space-between; min-height: 34px; margin-bottom: 10px; font-size: 19px; font-weight: 900; }
+        .stats-date.today > span:first-child { width: 34px; height: 34px; display: grid; place-items: center; border-radius: 50%; background: var(--primary-color); color: #fff; }
+        .day-edit-btn { padding: 4px 5px; border: 0; border-radius: 6px; background: transparent; cursor: pointer; font-size: 17px; opacity: 0; }
+        .day-edit-btn:hover, .day-edit-btn:focus-visible, .stats-day.editing .day-edit-btn { background: var(--primary-soft); opacity: 1; }
+        .stats-section-title { margin: 9px 0 5px; color: #768997; font-size: 12px; font-weight: 800; }
+        .mood-chip { position: relative; margin-bottom: 7px; padding: 7px 28px 7px 9px; border-radius: 8px; background: #fff7e6; color: #8b6a2b; font-size: 12px; line-height: 1.4; }
+        .record-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+        .record-block { position: relative; padding: 8px 26px 8px 8px; border-radius: 8px; font-size: 11px; line-height: 1.4; }
+        .record-block.sport { background: #eef8f1; color: #417453; }
+        .record-block.focus { background: var(--primary-soft); color: #356d96; }
+        .record-block-title { margin-bottom: 5px; font-weight: 850; }
+        .record-block-value { overflow-wrap: anywhere; }
+        .record-delete { position: absolute; top: 5px; right: 6px; width: 19px; height: 19px; padding: 0; border: 0; border-radius: 50%; background: rgba(255,255,255,.82); color: var(--danger-color); cursor: pointer; font-weight: 900; line-height: 19px; }
+        .day-todos { margin: 5px 0 0; padding: 0; list-style: none; font-size: 12px; }
+        .day-todos li { display: flex; gap: 5px; margin-bottom: 5px; padding: 5px 7px; border-radius: 7px; background: #f7f9fb; color: #5e6f7b; line-height: 1.4; overflow-wrap: anywhere; }
+        .day-completions { min-height: 56px; }
+        .editable-completion { flex: 1; min-width: 0; outline: none; border-bottom: 1px dashed var(--primary-color); }
+        .completion-delete { flex: 0 0 18px; width: 18px; height: 18px; padding: 0; border: 0; border-radius: 50%; background: #fdecec; color: var(--danger-color); cursor: pointer; font-size: 12px; font-weight: 900; line-height: 18px; }
+        .day-completion-add { display: flex; gap: 5px; margin-top: 6px; }
+        .day-completion-add input { min-width: 0; flex: 1; padding: 5px 7px; border: 1px dashed #b9d7e9; border-radius: 7px; outline: none; color: var(--text-color); font-size: 11px; }
+        .day-completion-add input:focus { border-color: var(--primary-color); }
+        .day-completion-add button { flex: 0 0 27px; padding: 0; border: 0; border-radius: 7px; background: var(--primary-color); color: #fff; cursor: pointer; font-weight: 900; }
+        .no-record { color: #adb8bf; font-size: 11px; }
+
+        .toast {
+            position: fixed;
+            right: 26px;
+            bottom: 26px;
+            max-width: 360px;
+            padding: 12px 17px;
+            border-radius: 10px;
+            background: #263746;
+            color: #fff;
+            box-shadow: 0 10px 30px rgba(0,0,0,.2);
+            opacity: 0;
+            transform: translateY(14px);
+            pointer-events: none;
+            transition: .25s;
+            z-index: 2000;
+            font-size: 13px;
+        }
+        .toast.show { opacity: 1; transform: translateY(0); }
+
+        .modal-overlay { position: fixed; inset: 0; display: none; align-items: center; justify-content: center; padding: 20px; background: rgba(28,48,64,.42); backdrop-filter: blur(3px); z-index: 1500; }
+        .modal-overlay.show { display: flex; }
+        .modal-content { width: min(430px, 100%); padding: 26px; border-radius: 16px; background: #fff; box-shadow: 0 22px 60px rgba(24,47,66,.24); }
+        .modal-title { margin-bottom: 20px; font-size: 18px; font-weight: 850; }
+        .form-row { display: grid; gap: 7px; margin-bottom: 16px; }
+        .form-row label { color: var(--muted-color); font-size: 13px; font-weight: 700; }
+        .form-input { width: 100%; padding: 11px 12px; border: 1px solid var(--border-color); border-radius: 9px; outline: none; color: var(--text-color); background: #fff; }
+        .form-input:focus { border-color: var(--primary-color); box-shadow: 0 0 0 3px rgba(52,152,219,.1); }
+        .modal-actions { display: flex; justify-content: flex-end; gap: 9px; margin-top: 22px; }
+        .modal-actions .delete-custom { margin-right: auto; }
+        .delete-custom.is-hidden { display: none; }
+        .cloud-hidden { display: none !important; }
+        .cloud-sync-btn[data-state="online"] { border-color: #9dd9b8; background: #edf9f2; color: #32714e; }
+        .cloud-sync-btn[data-state="syncing"] { border-color: #a9cfe7; background: var(--primary-soft); color: #356d96; }
+        .cloud-sync-btn[data-state="conflict"], .cloud-sync-btn[data-state="error"] { border-color: #efc1b9; background: #fff2ef; color: #a44c3c; }
+        .cloud-sync-intro { margin: -7px 0 18px; color: var(--muted-color); font-size: 13px; line-height: 1.65; }
+        .cloud-sync-status { margin-top: 13px; padding: 10px 12px; border-radius: 9px; background: #f5f8fa; color: var(--muted-color); font-size: 12px; line-height: 1.55; }
+        .cloud-sync-status.online { background: #edf9f2; color: #32714e; }
+        .cloud-sync-status.syncing { background: var(--primary-soft); color: #356d96; }
+        .cloud-sync-status.error, .cloud-sync-status.conflict { background: #fff2ef; color: #a44c3c; }
+        .cloud-account { padding: 15px; border: 1px solid var(--border-color); border-radius: 11px; background: var(--primary-soft); }
+        .cloud-account-name { margin-bottom: 5px; font-size: 17px; font-weight: 850; }
+        .cloud-account-note { color: var(--muted-color); font-size: 12px; line-height: 1.55; }
+        .cloud-button-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 9px; margin-top: 16px; }
+        .cloud-button-grid .primary-btn { width: 100%; }
+        .cloud-conflict { margin-top: 15px; padding: 13px; border: 1px solid #efc1b9; border-radius: 10px; background: #fff7f5; }
+        .cloud-conflict-title { color: #9b493b; font-weight: 850; }
+        .cloud-conflict-copy { margin-top: 5px; color: #93695f; font-size: 12px; line-height: 1.55; }
+        .cloud-password-note { margin-top: -8px; color: var(--muted-color); font-size: 11px; line-height: 1.45; }
+
+        @media (max-width: 1180px) {
+            .header-info { grid-template-columns: 1fr; }
+            .life-grid { grid-template-columns: repeat(2, minmax(280px, 1fr)); }
+            .life-card:last-child { grid-column: 1 / -1; }
+        }
+        @media (max-width: 900px) {
+            body { display: block; }
+            .sidebar { width: 100%; min-height: auto; position: static; flex-direction: row; align-items: center; gap: 8px; padding: 14px; overflow-x: auto; border-right: 0; border-bottom: 1px solid var(--border-color); }
+            .logo { margin: 0 auto 0 0; white-space: nowrap; }
+            .logo-subtitle { display: none; }
+            .nav-item { margin: 0; white-space: nowrap; }
+            .sidebar-tools { margin: 0; padding: 0; border: 0; display: flex; gap: 8px; }
+            .sidebar-tool-btn { width: auto; white-space: nowrap; text-align: center; }
+            .main-content { padding: 20px; }
+            .header-info { grid-template-columns: 1fr; }
+            .plan-grid { grid-template-columns: 1fr; }
+        }
+        @media (max-width: 680px) {
+            .countdown-grid { flex-direction: column; }
+            .checkin-container, .life-grid, .status-grid { grid-template-columns: 1fr; }
+            .add-countdown-card { flex-basis: 54px; min-height: 54px; width: 100%; }
+            .life-card:last-child { grid-column: auto; }
+            .main-content { padding: 14px; }
+            .card { padding: 18px; }
+        }
+    </style>
+</head>
+<body>
+    <aside class="sidebar">
+        <div class="logo" id="editable-logo" onclick="editAppName()" title="点击修改名称并生成对应文件名的 HTML">
+            <span id="app-name">小帅博士</span><br>
+            <span class="logo-subtitle">自律打卡系统</span>
+        </div>
+        <div class="nav-item active" onclick="showPage('home', this)">🏠 首页概览</div>
+        <div class="nav-item" onclick="showPage('life', this)">🏋️ 生活记录</div>
+        <div class="nav-item" onclick="showPage('stats', this)">📊 数据统计</div>
+        <div class="sidebar-tools">
+            <button type="button" class="sidebar-tool-btn cloud-sync-btn" id="cloud-sync-button" data-state="offline" onclick="openCloudSyncModal()">☁️ 云同步：未登录</button>
+            <button type="button" class="sidebar-tool-btn" onclick="exportAllData()">⬇️ 导出数据</button>
+            <button type="button" class="sidebar-tool-btn" onclick="document.getElementById('data-import-file').click()">⬆️ 导入数据</button>
+            <input type="file" class="hidden-file-input" id="data-import-file" accept=".json,application/json" onchange="importAllData(this.files[0]); this.value=''">
+        </div>
+    </aside>
+
+    <main class="main-content">
+        <section class="header-info">
+            <div class="time-card">
+                <div class="current-time" id="current-time">00:00</div>
+                <div class="current-date" id="current-date">2026年9月2日 星期三</div>
+                <div class="almanac-box" title="今日宜忌仅供生活参考">
+                    <div class="almanac-row yi"><span class="almanac-badge">宜</span><span class="almanac-text" id="almanac-yi">规划今日、整理环境、保持专注</span></div>
+                    <div class="almanac-row ji"><span class="almanac-badge">忌</span><span class="almanac-text" id="almanac-ji">拖延冲动、熬夜透支、仓促决定</span></div>
+                    <div class="almanac-source" id="almanac-source">正在更新万年历</div>
+                </div>
+            </div>
+            <div class="countdown-grid" id="countdown-grid">
+                <div class="custom-countdown-cards" id="custom-countdown-cards"></div>
+                <div class="countdown-card">
+                    <div class="cd-label">距离周一</div>
+                    <div class="cd-val" id="cd-weekday">0天</div>
+                </div>
+                <div class="countdown-card">
+                    <div class="cd-label" id="holiday-label">距离下一个法定节假日</div>
+                    <div class="cd-val" id="cd-holiday">0天</div>
+                </div>
+                <div class="countdown-card">
+                    <div class="cd-label">距离今年结束</div>
+                    <div class="cd-val" id="cd-year-end">0天</div>
+                </div>
+                <button type="button" class="countdown-card add-countdown-card" id="custom-countdown-add" onclick="openCustomCountdownModal()" title="添加自定义倒计时" aria-label="添加自定义倒计时">+</button>
+            </div>
+        </section>
+
+        <section id="page-home" class="page">
+            <div class="card">
+                <div class="card-title">📅 今日打卡</div>
+                <div class="checkin-container">
+                    <div class="checkin-item">
+                        <div class="checkin-icon" id="icon-am">⭕</div>
+                        <div class="checkin-name">上午</div>
+                        <div class="checkin-deadline">10:00前</div>
+                        <button class="primary-btn" id="btn-am" onclick="doCheckIn('am')">打卡</button>
+                    </div>
+                    <div class="checkin-item">
+                        <div class="checkin-icon" id="icon-pm">⭕</div>
+                        <div class="checkin-name">下午</div>
+                        <div class="checkin-deadline">15:00前</div>
+                        <button class="primary-btn" id="btn-pm" onclick="doCheckIn('pm')">打卡</button>
+                    </div>
+                    <div class="checkin-item">
+                        <div class="checkin-icon" id="icon-night">⭕</div>
+                        <div class="checkin-name">晚上</div>
+                        <div class="checkin-deadline">20:00前</div>
+                        <button class="primary-btn" id="btn-night" onclick="doCheckIn('night')">打卡</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-title">🎯 计划与记录</div>
+                <div class="plan-grid">
+                    <div class="calendar-container">
+                        <div class="cal-header">
+                            <span id="cal-month-label">2026年9月</span>
+                            <div>
+                                <button class="icon-btn" onclick="changeSmallCalendarMonth(-1)" aria-label="上个月">◀</button>
+                                <button class="icon-btn" onclick="changeSmallCalendarMonth(1)" aria-label="下个月">▶</button>
+                            </div>
+                        </div>
+                        <div class="cal-grid" id="calendar-grid"></div>
+                    </div>
+
+                    <div class="goal-panel">
+                        <div class="section-label"><span>📌 近期待办</span><span id="goal-count">0 / 0 完成</span></div>
+                        <div class="todo-input-group">
+                            <input class="todo-input" id="new-goal-input" placeholder="添加新任务，按回车确认" onkeydown="handleGoalInput(event)">
+                            <button class="primary-btn" onclick="addRecentGoal()">添加</button>
+                        </div>
+                        <ul class="todo-list" id="recent-goal-list"></ul>
+                    </div>
+                </div>
+
+                <div class="todo-section">
+                    <div class="section-label"><span>✅ 今日完成</span><span id="todo-count">已记录 0 项</span></div>
+                    <div class="todo-input-group">
+                        <input class="todo-input" id="new-todo-input" placeholder="添加今天完成的事项，按回车确认" onkeydown="handleTodoInput(event)">
+                        <button class="primary-btn" onclick="addTodo()">添加</button>
+                    </div>
+                    <ul class="todo-list" id="todo-list"></ul>
+                </div>
+            </div>
+        </section>
+
+        <section id="page-life" class="page hidden">
+            <div class="card">
+                <div class="card-title">📊 今日状态</div>
+                <div class="status-grid">
+                    <div class="status-panel">
+                        <div class="status-label">今日运动</div>
+                        <div><span class="status-value" id="life-sport-hr">0.0</span><span class="status-unit">小时</span></div>
+                        <div class="status-detail" id="life-sport-min">0 分钟</div>
+                    </div>
+                    <div class="status-panel">
+                        <div class="status-label">今日专注</div>
+                        <div><span class="status-value" id="life-focus-hr">0.0</span><span class="status-unit">小时</span></div>
+                        <div class="status-detail" id="life-focus-min">0 分钟</div>
+                    </div>
+                </div>
+            </div>
+            <div class="life-grid">
+                <div class="life-card">
+                    <div class="card-title">🏋️ 运动打卡</div>
+                    <div class="sport-options">
+                        <button class="sport-option" onclick="selectSport('swimming', this)">🏊 游泳</button>
+                        <button class="sport-option active" onclick="selectSport('badminton', this)">🏸 羽毛球</button>
+                        <button class="sport-option" onclick="selectSport('gym', this)">🏋️ 健身</button>
+                        <button class="sport-option" onclick="selectSport('cycling', this)">🚴 骑行</button>
+                        <button class="sport-option" onclick="selectSport('running', this)">🏃 跑步</button>
+                        <button class="sport-option" onclick="selectSport('basketball', this)">🏀 篮球</button>
+                        <button class="sport-option" onclick="selectSport('walking', this)">🚶 散步</button>
+                        <button class="sport-option" onclick="selectSport('volleyball', this)">🏐 排球</button>
+                        <button class="sport-option" onclick="selectSport('tennis', this)">🎾 网球</button>
+                        <button class="sport-option" onclick="selectSport('gaming', this)">🎮 游戏</button>
+                    </div>
+                    <div class="mono-display" id="sport-stopwatch">00:00:00</div>
+                    <div class="button-row" style="margin-top:22px;">
+                        <button class="primary-btn" onclick="startStopwatch()">开始计时</button>
+                        <button class="primary-btn danger-btn" onclick="stopStopwatch()">停止并记录</button>
+                    </div>
+                    <div class="manual-entry">
+                        <input type="number" min="1" id="manual-sport-min" class="number-input" placeholder="手动输入（分钟）">
+                        <button class="primary-btn" onclick="addManualSport()">添加记录</button>
+                    </div>
+                </div>
+
+                <div class="life-card">
+                    <div class="card-title">🍅 番茄时钟</div>
+                    <div class="timer-modes">
+                        <button class="primary-btn timer-mode" data-minutes="30" onclick="setTimer(30)">30分钟</button>
+                        <button class="primary-btn ghost-btn timer-mode" data-minutes="60" onclick="setTimer(60)">60分钟</button>
+                        <button class="primary-btn ghost-btn timer-mode" data-minutes="120" onclick="setTimer(120)">120分钟</button>
+                    </div>
+                    <div class="timer-ring" id="timer-ring"><div class="mono-display" id="timer-display">30:00</div></div>
+                    <div class="button-row">
+                        <button class="primary-btn" onclick="startTimer()">开始专注</button>
+                        <button class="primary-btn danger-btn" onclick="pauseTimer()">暂停</button>
+                    </div>
+                    <div class="timer-note">完成一个番茄周期后，专注时长会自动记入当天。</div>
+                </div>
+
+                <div class="life-card">
+                    <div class="card-title">🌿 健康生活</div>
+                    <div class="health-list">
+                        <button class="health-row" id="health-sleep" onclick="toggleHealth('sleep')"><span>😴 充足睡眠</span><span class="health-check"></span></button>
+                        <button class="health-row" id="health-meal" onclick="toggleHealth('meal')"><span>🍚 好好吃饭</span><span class="health-check"></span></button>
+                        <button class="health-row" id="health-medicine" onclick="toggleHealth('medicine')"><span>💊 按时吃药</span><span class="health-check"></span></button>
+                    </div>
+                    <div class="mood-box">
+                        <div class="mood-heading"><span>💗 今日心情</span><span class="mood-score" id="mood-score">😐 50分</span></div>
+                        <input type="range" min="0" max="100" value="50" class="mood-slider" id="mood-slider" oninput="previewMood(this.value)" onchange="saveMood(this.value)">
+                        <div class="mood-ends"><span>😞 沮丧</span><span>😊 开心</span></div>
+                    </div>
+                    <div class="health-tip">这些记录按天保存，可在“数据统计”中按月份回看。</div>
+                </div>
+            </div>
+        </section>
+
+        <section id="page-stats" class="page hidden">
+            <div class="card">
+                <div class="card-title stats-toolbar">
+                    <span>🗓️ 当月日历</span>
+                    <div class="button-row">
+                        <button class="primary-btn ghost-btn" onclick="changeStatsMonth(-1)">◀ 上月</button>
+                        <input type="month" class="month-picker" id="stats-month-picker" onchange="pickStatsMonth(this.value)">
+                        <button class="primary-btn ghost-btn" onclick="changeStatsMonth(1)">下月 ▶</button>
+                    </div>
+                </div>
+                <div class="stats-scroll"><div class="stats-calendar" id="stats-calendar"></div></div>
+            </div>
+        </section>
+    </main>
+
+    <div class="modal-overlay" id="custom-countdown-modal" onclick="if(event.target===this) closeCustomCountdownModal()">
+        <div class="modal-content">
+            <div class="modal-title" id="custom-countdown-modal-title">添加自定义倒计时</div>
+            <div class="form-row">
+                <label for="custom-countdown-name">名称</label>
+                <input class="form-input" id="custom-countdown-name" maxlength="20" placeholder="例如：国考">
+            </div>
+            <div class="form-row">
+                <label for="custom-countdown-date">日期</label>
+                <input type="date" class="form-input" id="custom-countdown-date">
+            </div>
+            <div class="modal-actions">
+                <button class="primary-btn danger-btn delete-custom is-hidden" id="delete-custom-countdown" onclick="deleteCustomCountdown()">删除倒计时</button>
+                <button class="primary-btn ghost-btn" onclick="closeCustomCountdownModal()">取消</button>
+                <button class="primary-btn" onclick="saveCustomCountdown()">保存</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="cloud-sync-modal" onclick="if(event.target===this) closeCloudSyncModal()">
+        <div class="modal-content">
+            <div class="modal-title">☁️ 私人云同步</div>
+            <div class="cloud-sync-intro">最多支持50个独立账号。首次在主设备注册会把本机记录上传；其他设备登录同一账号会自动恢复云端记录。</div>
+
+            <div id="cloud-auth-panel">
+                <div class="form-row">
+                    <label for="cloud-username">同步名称</label>
+                    <input class="form-input" id="cloud-username" maxlength="30" autocomplete="username" placeholder="例如：xiaoshuai">
+                </div>
+                <div class="form-row">
+                    <label for="cloud-password">私人同步密码</label>
+                    <input type="password" class="form-input" id="cloud-password" maxlength="128" autocomplete="current-password" placeholder="至少10位，请妥善保存">
+                </div>
+                <div class="cloud-password-note">服务器不会保存密码原文；忘记密码后无法读取原账号的数据。</div>
+                <div class="form-row" style="margin-top:16px;">
+                    <label for="cloud-invite-code">管理员邀请码（仅首次注册需要）</label>
+                    <input type="password" class="form-input" id="cloud-invite-code" maxlength="128" autocomplete="off" placeholder="登录已有账号时留空">
+                </div>
+                <div class="modal-actions">
+                    <button class="primary-btn ghost-btn" onclick="closeCloudSyncModal()">取消</button>
+                    <button class="primary-btn ghost-btn" id="cloud-register-btn" onclick="registerCloudUser()">首次注册</button>
+                    <button class="primary-btn" id="cloud-login-btn" onclick="loginCloudUser()">登录</button>
+                </div>
+            </div>
+
+            <div id="cloud-account-panel" class="cloud-hidden">
+                <div class="cloud-account">
+                    <div class="cloud-account-name" id="cloud-account-name">已登录</div>
+                    <div class="cloud-account-note">本机修改会自动上传；回到本页面或重新获得焦点时会检查其他设备的新记录。</div>
+                </div>
+                <div class="cloud-button-grid">
+                    <button class="primary-btn" onclick="syncCloudNow()">立即同步</button>
+                    <button class="primary-btn ghost-btn" onclick="logoutCloudUser()">退出云同步</button>
+                </div>
+                <div class="cloud-conflict cloud-hidden" id="cloud-conflict-panel">
+                    <div class="cloud-conflict-title">检测到两台设备同时修改</div>
+                    <div class="cloud-conflict-copy">请选择要保留的版本。操作前，本机版本会留一份安全副本。</div>
+                    <div class="cloud-button-grid">
+                        <button class="primary-btn" onclick="useCloudVersion()">使用云端版本</button>
+                        <button class="primary-btn ghost-btn" onclick="overwriteCloudVersion()">使用本机版本</button>
+                    </div>
+                </div>
+                <div class="modal-actions">
+                    <button class="primary-btn ghost-btn" onclick="closeCloudSyncModal()">关闭</button>
+                </div>
+            </div>
+
+            <div class="cloud-sync-status" id="cloud-sync-status">尚未登录云同步</div>
+        </div>
+    </div>
+
+    <div class="toast" id="toast"></div>
+
+    <script>
+        const DAY_MS = 86400000;
+        const KNOWN_HOLIDAY_PERIODS = {
+            2026: [
+                { name: '元旦', start: '2026-01-01', end: '2026-01-03' },
+                { name: '春节', start: '2026-02-15', end: '2026-02-23' },
+                { name: '清明节', start: '2026-04-04', end: '2026-04-06' },
+                { name: '劳动节', start: '2026-05-01', end: '2026-05-05' },
+                { name: '端午节', start: '2026-06-19', end: '2026-06-21' },
+                { name: '中秋节', start: '2026-09-25', end: '2026-09-27' },
+                { name: '国庆节', start: '2026-10-01', end: '2026-10-07' }
+            ]
+        };
+        const ALMANAC_FALLBACKS = [
+            { yi: '规划今日、整理环境、专注学习、适度运动', ji: '拖延冲动、熬夜透支、仓促决定' },
+            { yi: '复盘总结、沟通协作、规律作息、清理待办', ji: '急躁争执、过度承诺、久坐不动' },
+            { yi: '读书充电、稳步推进、好好吃饭、早睡早起', ji: '分心内耗、临时起意、忽略休息' },
+            { yi: '制定计划、耐心执行、收纳整理、亲近自然', ji: '畏难搁置、情绪用事、饮食无度' },
+            { yi: '完成重点、适量锻炼、真诚交流、保持从容', ji: '贪多求快、反复拖延、勉强自己' }
+        ];
+        const SPORT_NAMES = {
+            swimming: '游泳', badminton: '羽毛球', gym: '健身', cycling: '骑行', running: '跑步',
+            basketball: '篮球', walking: '散步', volleyball: '排球', tennis: '网球', gaming: '游戏'
+        };
+        const CHECKIN_WINDOWS = { am: [360, 600], pm: [720, 900], night: [1020, 1200] };
+        const DATA_STORAGE_DEFAULTS = {
+            ddHistoryData: {}, ddTodos: {}, ddRecentGoals: [], ddCheckins: {},
+            ddHealthData: {}, ddAlmanacRecords: {}, ddAppSettings: {}
+        };
+        const DATA_STORAGE_KEYS = Object.keys(DATA_STORAGE_DEFAULTS);
+        const CLOUD_SESSION_KEY = 'ddCloudSession';
+        const CLOUD_REVISION_KEY = 'ddCloudRevision';
+        const CLOUD_DIRTY_KEY = 'ddCloudDirty';
+        const CLOUD_SAFETY_BACKUP_KEY = 'ddCloudSafetyBackup';
+        // 线上版不内嵌任何人的历史日志；每个账号仅从自己的云端或导入文件读取数据。
+        const IMPORTED_LOG_VERSION = '';
+        const IMPORTED_LOG_TODOS = {}; /* __IMPORTED_LOG_TODOS__ */
+        let historyData = {};
+        let todos = {};
+        let recentGoals = [];
+        let checkinData = {};
+        let healthData = {};
+        let almanacRecords = {};
+        let currentCalendarDate = new Date();
+        let statsCalendarDate = new Date();
+        let activeDateKey = '';
+        let appReady = false;
+        const defaultAppName = document.querySelector('meta[name="app-name"]').content || '小帅博士';
+        let appSettings = { name: defaultAppName, customCountdowns: [] };
+
+        let checkinStatus = { am: false, pm: false, night: false };
+        let stopwatchInterval = null;
+        let stopwatchTime = 0;
+        let currentSportType = 'badminton';
+        let timerInterval = null;
+        let timeLeft = 30 * 60;
+        let currentMode = 30;
+        let timerEndTs = null;
+        let timerStartLeftSec = null;
+        let editingDateKey = '';
+        let editingCustomCountdownIndex = null;
+        let toastTimer = null;
+        let cloudSession = null;
+        let cloudRevision = 0;
+        let cloudDirty = false;
+        let cloudSyncTimer = null;
+        let cloudSyncing = false;
+        let cloudApplying = false;
+        let cloudConflictData = null;
+        let lastCloudPullAt = 0;
+
+        function safeJSON(value, fallback) {
+            if (!value) return fallback;
+            try { return JSON.parse(value); } catch (_) { return fallback; }
+        }
+
+        function formatDateKey(date) {
+            const y = date.getFullYear();
+            const m = String(date.getMonth() + 1).padStart(2, '0');
+            const d = String(date.getDate()).padStart(2, '0');
+            return `${y}-${m}-${d}`;
+        }
+
+        function makeId(prefix) {
+            if (window.crypto && crypto.randomUUID) return `${prefix}-${crypto.randomUUID()}`;
+            return `${prefix}-${Date.now()}-${Math.random().toString(16).slice(2)}`;
+        }
+
+        function escapeHTML(value) {
+            return String(value ?? '').replace(/[&<>'"]/g, char => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[char]));
+        }
+
+        function save(key, data) {
+            localStorage.setItem(key, JSON.stringify(data));
+            if (appReady && !cloudApplying && DATA_STORAGE_KEYS.includes(key)) {
+                cloudDirty = true;
+                localStorage.setItem(CLOUD_DIRTY_KEY, '1');
+                scheduleCloudPush();
+            }
+        }
+        function saveHistoryData() { save('ddHistoryData', historyData); }
+        function saveTodos() { save('ddTodos', todos); }
+        function saveSettingsData() { save('ddAppSettings', appSettings); }
+
+        function cloudCanConnect() {
+            return location.protocol === 'https:' || location.protocol === 'http:';
+        }
+
+        function captureCloudData() {
+            const data = {};
+            DATA_STORAGE_KEYS.forEach(key => {
+                data[key] = safeJSON(localStorage.getItem(key), DATA_STORAGE_DEFAULTS[key]);
+            });
+            return data;
+        }
+
+        function isValidCloudData(data) {
+            if (!isPlainObject(data)) return false;
+            return DATA_STORAGE_KEYS.every(key => {
+                const value = data[key];
+                return key === 'ddRecentGoals' ? Array.isArray(value) : isPlainObject(value);
+            });
+        }
+
+        function saveCloudSafetyBackup(reason) {
+            try {
+                localStorage.setItem(CLOUD_SAFETY_BACKUP_KEY, JSON.stringify({
+                    savedAt: new Date().toISOString(),
+                    reason: reason || 'cloud-sync',
+                    data: captureCloudData()
+                }));
+            } catch (_) {}
+        }
+
+        function setCloudStatus(state, message) {
+            const button = document.getElementById('cloud-sync-button');
+            const status = document.getElementById('cloud-sync-status');
+            const labels = {
+                offline: '☁️ 云同步：未登录',
+                online: '☁️ 云同步：' + (cloudSession?.username || '已连接'),
+                syncing: '☁️ 云同步：同步中',
+                conflict: '☁️ 云同步：需处理',
+                error: '☁️ 云同步：连接异常'
+            };
+            if (button) {
+                button.dataset.state = state;
+                button.textContent = labels[state] || labels.offline;
+            }
+            if (status) {
+                status.className = 'cloud-sync-status ' + state;
+                status.textContent = message || labels[state] || labels.offline;
+            }
+        }
+
+        function renderCloudPanel() {
+            const loggedIn = Boolean(cloudSession?.token);
+            document.getElementById('cloud-auth-panel')?.classList.toggle('cloud-hidden', loggedIn);
+            document.getElementById('cloud-account-panel')?.classList.toggle('cloud-hidden', !loggedIn);
+            document.getElementById('cloud-conflict-panel')?.classList.toggle('cloud-hidden', !cloudConflictData);
+            const name = document.getElementById('cloud-account-name');
+            if (name && loggedIn) name.textContent = '已登录：' + cloudSession.username;
+        }
+
+        function openCloudSyncModal() {
+            renderCloudPanel();
+            document.getElementById('cloud-sync-modal').classList.add('show');
+            if (!cloudSession) setTimeout(() => document.getElementById('cloud-username')?.focus(), 0);
+        }
+
+        function closeCloudSyncModal() {
+            document.getElementById('cloud-sync-modal').classList.remove('show');
+        }
+
+        function setCloudAuthBusy(busy) {
+            ['cloud-register-btn', 'cloud-login-btn'].forEach(id => {
+                const button = document.getElementById(id);
+                if (button) button.disabled = busy;
+            });
+        }
+
+        async function cloudApi(path, options = {}) {
+            if (!cloudCanConnect()) {
+                const localError = new Error('请从部署后的 Cloudflare 固定网址使用云同步');
+                localError.code = 'local_file';
+                throw localError;
+            }
+            const headers = { ...(options.headers || {}) };
+            if (options.body && !headers['content-type']) headers['content-type'] = 'application/json';
+            if (cloudSession?.token) headers.authorization = 'Bearer ' + cloudSession.token;
+            const response = await fetch('/api' + path, { ...options, headers });
+            let payload = {};
+            try { payload = await response.json(); } catch (_) {}
+            if (!response.ok) {
+                const requestError = new Error(payload.message || '云同步请求失败');
+                requestError.status = response.status;
+                requestError.code = payload.code || 'request_failed';
+                requestError.payload = payload;
+                throw requestError;
+            }
+            return payload;
+        }
+
+        function storeCloudSession(payload) {
+            cloudSession = {
+                token: payload.token,
+                username: payload.username,
+                expiresAt: Number(payload.expiresAt || 0)
+            };
+            cloudRevision = 0;
+            cloudDirty = false;
+            cloudConflictData = null;
+            localStorage.setItem(CLOUD_SESSION_KEY, JSON.stringify(cloudSession));
+            localStorage.setItem(CLOUD_REVISION_KEY, '0');
+            localStorage.removeItem(CLOUD_DIRTY_KEY);
+            renderCloudPanel();
+        }
+
+        function clearCloudSession(message) {
+            cloudSession = null;
+            cloudRevision = 0;
+            cloudDirty = false;
+            cloudConflictData = null;
+            localStorage.removeItem(CLOUD_SESSION_KEY);
+            localStorage.removeItem(CLOUD_REVISION_KEY);
+            localStorage.removeItem(CLOUD_DIRTY_KEY);
+            renderCloudPanel();
+            setCloudStatus('offline', message || '尚未登录云同步');
+        }
+
+        function handleCloudError(error, quiet = false) {
+            if (error?.status === 401) {
+                clearCloudSession('登录已失效，请重新登录');
+            } else {
+                setCloudStatus('error', error?.message || '云同步暂时不可用，请稍后重试');
+            }
+            if (!quiet) showToast(error?.message || '云同步暂时不可用，请稍后重试');
+        }
+
+        function applyCloudSnapshot(data, revision, reason) {
+            if (!isValidCloudData(data)) throw new Error('云端数据格式不完整，未覆盖本机记录');
+            saveCloudSafetyBackup(reason || 'before-cloud-download');
+            cloudApplying = true;
+            DATA_STORAGE_KEYS.forEach(key => localStorage.setItem(key, JSON.stringify(data[key])));
+            cloudRevision = Number(revision || 0);
+            cloudDirty = false;
+            cloudConflictData = null;
+            localStorage.setItem(CLOUD_REVISION_KEY, String(cloudRevision));
+            localStorage.removeItem(CLOUD_DIRTY_KEY);
+            setCloudStatus('online', '已下载云端最新记录，正在刷新页面');
+            showToast('云端记录已同步到本机');
+            setTimeout(() => location.reload(), 350);
+        }
+
+        async function pushCloudData(force = false) {
+            if (!cloudSession || cloudSyncing) return false;
+            cloudSyncing = true;
+            setCloudStatus('syncing', '正在上传本机记录…');
+            try {
+                const payload = await cloudApi('/sync', {
+                    method: 'PUT',
+                    body: JSON.stringify({ data: captureCloudData(), baseRevision: cloudRevision, force })
+                });
+                cloudRevision = Number(payload.revision || cloudRevision + 1);
+                cloudDirty = false;
+                cloudConflictData = null;
+                localStorage.setItem(CLOUD_REVISION_KEY, String(cloudRevision));
+                localStorage.removeItem(CLOUD_DIRTY_KEY);
+                renderCloudPanel();
+                setCloudStatus('online', '同步完成 · 云端版本 ' + cloudRevision);
+                return true;
+            } catch (error) {
+                if (error?.code === 'revision_conflict') {
+                    cloudConflictData = error.payload || { revision: cloudRevision + 1 };
+                    renderCloudPanel();
+                    setCloudStatus('conflict', '其他设备已有新记录，请选择保留云端或本机版本');
+                    openCloudSyncModal();
+                } else {
+                    handleCloudError(error);
+                }
+                return false;
+            } finally {
+                cloudSyncing = false;
+            }
+        }
+
+        async function pullCloudData(force = false, quiet = false) {
+            if (!cloudSession || cloudSyncing) return false;
+            cloudSyncing = true;
+            setCloudStatus('syncing', '正在检查云端新记录…');
+            try {
+                const payload = await cloudApi('/sync');
+                const remoteRevision = Number(payload.revision || 0);
+                lastCloudPullAt = Date.now();
+                if (remoteRevision === 0 && !isValidCloudData(payload.data)) {
+                    cloudSyncing = false;
+                    cloudDirty = true;
+                    localStorage.setItem(CLOUD_DIRTY_KEY, '1');
+                    return pushCloudData(true);
+                }
+                if ((force || remoteRevision > cloudRevision) && isValidCloudData(payload.data)) {
+                    if (cloudDirty && !force) {
+                        cloudConflictData = payload;
+                        renderCloudPanel();
+                        setCloudStatus('conflict', '本机和云端都有新记录，请选择要保留的版本');
+                        openCloudSyncModal();
+                        return false;
+                    }
+                    applyCloudSnapshot(payload.data, remoteRevision, 'before-cloud-download');
+                    return true;
+                }
+                if (cloudDirty) {
+                    cloudSyncing = false;
+                    return pushCloudData(false);
+                }
+                cloudRevision = remoteRevision;
+                localStorage.setItem(CLOUD_REVISION_KEY, String(cloudRevision));
+                setCloudStatus('online', '已是最新记录 · 云端版本 ' + cloudRevision);
+                return true;
+            } catch (error) {
+                handleCloudError(error, quiet);
+                return false;
+            } finally {
+                cloudSyncing = false;
+            }
+        }
+
+        function scheduleCloudPush() {
+            if (!cloudSession || cloudApplying) return;
+            clearTimeout(cloudSyncTimer);
+            cloudSyncTimer = setTimeout(() => pushCloudData(false), 1400);
+        }
+
+        async function registerCloudUser() {
+            const username = document.getElementById('cloud-username').value.trim();
+            const password = document.getElementById('cloud-password').value;
+            const inviteCode = document.getElementById('cloud-invite-code').value;
+            if (!username || password.length < 10 || !inviteCode) {
+                showToast('请填写同步名称、至少10位私人密码和管理员邀请码');
+                return;
+            }
+            setCloudAuthBusy(true);
+            setCloudStatus('syncing', '正在创建私人同步账号…');
+            try {
+                const payload = await cloudApi('/register', {
+                    method: 'POST',
+                    body: JSON.stringify({ username, password, inviteCode })
+                });
+                storeCloudSession(payload);
+                cloudDirty = true;
+                localStorage.setItem(CLOUD_DIRTY_KEY, '1');
+                const uploaded = await pushCloudData(true);
+                if (uploaded) showToast('注册成功，本机全部记录已安全上传');
+                document.getElementById('cloud-password').value = '';
+                document.getElementById('cloud-invite-code').value = '';
+            } catch (error) {
+                handleCloudError(error);
+            } finally {
+                setCloudAuthBusy(false);
+            }
+        }
+
+        async function loginCloudUser() {
+            const username = document.getElementById('cloud-username').value.trim();
+            const password = document.getElementById('cloud-password').value;
+            if (!username || !password) {
+                showToast('请输入同步名称和私人密码');
+                return;
+            }
+            setCloudAuthBusy(true);
+            setCloudStatus('syncing', '正在登录并读取云端记录…');
+            saveCloudSafetyBackup('before-cloud-login');
+            try {
+                const payload = await cloudApi('/login', {
+                    method: 'POST',
+                    body: JSON.stringify({ username, password })
+                });
+                storeCloudSession(payload);
+                document.getElementById('cloud-password').value = '';
+                await pullCloudData(true);
+            } catch (error) {
+                handleCloudError(error);
+            } finally {
+                setCloudAuthBusy(false);
+            }
+        }
+
+        async function logoutCloudUser() {
+            if (!cloudSession) return;
+            const confirmed = window.confirm('退出后本机记录仍会保留，但不会再自动同步。确定退出吗？');
+            if (!confirmed) return;
+            try { await cloudApi('/logout', { method: 'POST' }); } catch (_) {}
+            clearCloudSession('已退出；本机记录仍保留');
+            closeCloudSyncModal();
+            showToast('已退出云同步，本机记录未删除');
+        }
+
+        function syncCloudNow() {
+            if (cloudDirty) pushCloudData(false);
+            else pullCloudData(false);
+        }
+
+        function useCloudVersion() {
+            if (!window.confirm('将使用云端版本覆盖本机。系统会先保留一份本机安全副本，确定继续吗？')) return;
+            pullCloudData(true);
+        }
+
+        function overwriteCloudVersion() {
+            if (!window.confirm('将使用本机版本覆盖云端，其他设备下次同步后也会采用本机版本。确定继续吗？')) return;
+            saveCloudSafetyBackup('before-force-cloud-upload');
+            pushCloudData(true);
+        }
+
+        function initializeCloudSync() {
+            cloudSession = safeJSON(localStorage.getItem(CLOUD_SESSION_KEY), null);
+            cloudRevision = Math.max(0, Number(localStorage.getItem(CLOUD_REVISION_KEY) || 0));
+            cloudDirty = localStorage.getItem(CLOUD_DIRTY_KEY) === '1';
+            const expired = cloudSession?.expiresAt && cloudSession.expiresAt <= Math.floor(Date.now() / 1000);
+            if (!cloudSession?.token || expired) {
+                clearCloudSession(expired ? '登录已过期，请重新登录' : '尚未登录云同步');
+                return;
+            }
+            renderCloudPanel();
+            setCloudStatus('online', cloudDirty ? '本机有待上传的修改' : '已登录，正在检查云端记录');
+            setTimeout(() => pullCloudData(false, true), 300);
+        }
+
+        function exportAllData() {
+            const data = {};
+            DATA_STORAGE_KEYS.forEach(key => {
+                data[key] = safeJSON(localStorage.getItem(key), DATA_STORAGE_DEFAULTS[key]);
+            });
+            const backup = {
+                format: 'xiaoshuai-doctor-checkin-backup',
+                version: 1,
+                exportedAt: new Date().toISOString(),
+                data
+            };
+            const blob = new Blob([JSON.stringify(backup, null, 2)], { type: 'application/json;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `${safeFileName(appSettings.name || defaultAppName)}数据备份_${formatDateKey(new Date())}.json`;
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+            setTimeout(() => URL.revokeObjectURL(url), 1500);
+            showToast(`数据已导出为“${link.download}”`);
+        }
+
+        function isPlainObject(value) {
+            return value !== null && typeof value === 'object' && !Array.isArray(value);
+        }
+
+        function isValidBackup(backup) {
+            if (!isPlainObject(backup) || backup.format !== 'xiaoshuai-doctor-checkin-backup' || backup.version !== 1 || !isPlainObject(backup.data)) return false;
+            return DATA_STORAGE_KEYS.every(key => {
+                const value = backup.data[key];
+                return key === 'ddRecentGoals' ? Array.isArray(value) : isPlainObject(value);
+            });
+        }
+
+        function applyImportedData(backup) {
+            DATA_STORAGE_KEYS.forEach(key => save(key, backup.data[key]));
+        }
+
+        function importAllData(file) {
+            if (!file) return;
+            if (file.size > 10 * 1024 * 1024) {
+                showToast('备份文件过大，未执行导入');
+                return;
+            }
+            const reader = new FileReader();
+            reader.onload = () => {
+                try {
+                    const backup = JSON.parse(String(reader.result || ''));
+                    if (!isValidBackup(backup)) throw new Error('invalid backup');
+                    if (!window.confirm('导入会覆盖当前全部记录和设置，确定继续吗？')) return;
+                    applyImportedData(backup);
+                    showToast('数据导入成功，正在刷新页面');
+                    setTimeout(() => window.location.reload(), 700);
+                } catch (_) {
+                    showToast('导入失败：请选择由本系统导出的 JSON 备份文件');
+                }
+            };
+            reader.onerror = () => showToast('读取备份文件失败');
+            reader.readAsText(file, 'utf-8');
+        }
+
+        function loadData() {
+            historyData = safeJSON(localStorage.getItem('ddHistoryData'), {});
+            todos = safeJSON(localStorage.getItem('ddTodos'), {});
+            recentGoals = safeJSON(localStorage.getItem('ddRecentGoals'), []);
+            checkinData = safeJSON(localStorage.getItem('ddCheckins'), {});
+            healthData = safeJSON(localStorage.getItem('ddHealthData'), {});
+            almanacRecords = safeJSON(localStorage.getItem('ddAlmanacRecords'), {});
+            appSettings = { ...appSettings, ...safeJSON(localStorage.getItem('ddAppSettings'), {}) };
+            if (appSettings.name === '小丁博士' || appSettings.name === '小王老师') {
+                appSettings.name = defaultAppName;
+                saveSettingsData();
+            }
+            migrateCustomCountdowns();
+            migrateStoredData();
+        }
+
+        function seedImportedLogTodos() {
+            if (appSettings.importedLogVersion === IMPORTED_LOG_VERSION) return;
+            Object.entries(IMPORTED_LOG_TODOS).forEach(([dateKey, importedItems]) => {
+                if (!Array.isArray(todos[dateKey])) todos[dateKey] = [];
+                const existingTexts = new Set(todos[dateKey].map(item => String(item.text || '').replace(/\s+/g, '').trim()));
+                importedItems.forEach(item => {
+                    const textKey = String(item.text || '').replace(/\s+/g, '').trim();
+                    if (!textKey || existingTexts.has(textKey)) return;
+                    todos[dateKey].push({ ...item });
+                    existingTexts.add(textKey);
+                });
+            });
+            appSettings.importedLogVersion = IMPORTED_LOG_VERSION;
+            saveTodos();
+            saveSettingsData();
+        }
+
+        function migrateCustomCountdowns() {
+            const before = JSON.stringify(appSettings);
+            let countdowns = Array.isArray(appSettings.customCountdowns) ? appSettings.customCountdowns : [];
+            const legacy = appSettings.customCountdown;
+            if (!countdowns.length && legacy && legacy.name && /^\d{4}-\d{2}-\d{2}$/.test(legacy.date || '')) {
+                countdowns = [legacy];
+            }
+            appSettings.customCountdowns = countdowns
+                .filter(item => item && String(item.name || '').trim() && /^\d{4}-\d{2}-\d{2}$/.test(item.date || ''))
+                .slice(0, 5)
+                .map(item => ({ id: item.id || makeId('countdown'), name: String(item.name).trim(), date: item.date }));
+            delete appSettings.customCountdown;
+            if (JSON.stringify(appSettings) !== before) saveSettingsData();
+        }
+
+        function migrateStoredData() {
+            let changed = false;
+            Object.keys(todos).forEach(dateKey => {
+                if (!Array.isArray(todos[dateKey])) { todos[dateKey] = []; changed = true; return; }
+                todos[dateKey].forEach(item => {
+                    if (!item.id) { item.id = makeId('todo'); changed = true; }
+                    if (item.completed !== true) { item.completed = true; changed = true; }
+                });
+            });
+            const todayKey = formatDateKey(new Date());
+            recentGoals.forEach(goal => {
+                if (!goal.id) { goal.id = makeId('goal'); changed = true; }
+                if (!goal.startDate) { goal.startDate = todayKey; changed = true; }
+                if (goal.completed && !goal.endDate) { goal.endDate = todayKey; changed = true; }
+            });
+            if (changed) { saveTodos(); save('ddRecentGoals', recentGoals); }
+        }
+
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.classList.add('show');
+            clearTimeout(toastTimer);
+            toastTimer = setTimeout(() => toast.classList.remove('show'), 3200);
+        }
+
+        function applyAppName() {
+            const name = appSettings.name || defaultAppName;
+            document.getElementById('app-name').textContent = name;
+            document.title = `${name}自律打卡系统`;
+            document.querySelector('meta[name="app-name"]').setAttribute('content', name);
+        }
+
+        function safeFileName(name) {
+            const cleaned = String(name).replace(/[<>:"/\\|?*\u0000-\u001F]/g, '').replace(/[. ]+$/g, '').trim();
+            return cleaned || '自律';
+        }
+
+        function downloadRenamedCopy() {
+            const clone = document.documentElement.cloneNode(true);
+            clone.querySelector('meta[name="app-name"]').setAttribute('content', appSettings.name);
+            clone.querySelector('title').textContent = `${appSettings.name}自律打卡系统`;
+            clone.querySelector('#app-name').textContent = appSettings.name;
+            clone.querySelector('#toast').classList.remove('show');
+            const html = '<!DOCTYPE html>\n' + clone.outerHTML;
+            const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `${safeFileName(appSettings.name)}打卡系统.html`;
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+            setTimeout(() => URL.revokeObjectURL(url), 1500);
+            showToast(`名称和标签页已更新，并已生成“${link.download}”`);
+        }
+
+        function editAppName() {
+            const nextName = prompt('请输入新的名称：', appSettings.name);
+            if (nextName === null) return;
+            const trimmed = nextName.trim();
+            if (!trimmed) { showToast('名称不能为空'); return; }
+            appSettings.name = trimmed;
+            saveSettingsData();
+            applyAppName();
+            downloadRenamedCopy();
+        }
+
+        function updateTime() {
+            const now = new Date();
+            document.getElementById('current-time').textContent = now.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit', hour12: false });
+            document.getElementById('current-date').textContent = now.toLocaleDateString('zh-CN', { year: 'numeric', month: 'long', day: 'numeric', weekday: 'long' });
+            if (appReady) {
+                const todayKey = formatDateKey(now);
+                if (todayKey !== activeDateKey) refreshForNewDay();
+                updateCheckinUI();
+            }
+        }
+
+        function updateCountdowns() {
+            const now = new Date();
+            now.setHours(0, 0, 0, 0);
+            const weekdayDiff = (1 - now.getDay() + 7) % 7;
+            document.getElementById('cd-weekday').textContent = `${weekdayDiff}天`;
+
+            const holiday = getNextStatutoryHoliday(now);
+            document.getElementById('holiday-label').textContent = `距离${holiday.name}`;
+            document.getElementById('cd-holiday').textContent = `${holiday.days}天`;
+
+            const yearEnd = new Date(now.getFullYear(), 11, 31);
+            document.getElementById('cd-year-end').textContent = `${Math.round((yearEnd - now) / DAY_MS)}天`;
+            updateCustomCountdowns(now);
+        }
+
+        function updateCustomCountdowns(now = new Date()) {
+            const countdowns = Array.isArray(appSettings.customCountdowns) ? appSettings.customCountdowns.slice(0, 5) : [];
+            const today = new Date(now);
+            today.setHours(0, 0, 0, 0);
+            document.getElementById('custom-countdown-cards').innerHTML = countdowns.map((custom, index) => {
+                const target = parseLocalDateKey(custom.date);
+                const difference = Math.round((target - today) / DAY_MS);
+                const value = difference < 0 ? '已到期' : `${difference}天`;
+                return `<div class="countdown-card custom-countdown-card" onclick="openCustomCountdownModal(${index})" title="点击修改${escapeHTML(custom.name)}倒计时">
+                    <div class="cd-label">距离${escapeHTML(custom.name)}</div><div class="cd-val">${value}</div>
+                </div>`;
+            }).join('');
+            const addButton = document.getElementById('custom-countdown-add');
+            addButton.disabled = countdowns.length >= 5;
+            addButton.title = addButton.disabled ? '最多添加5个自定义倒计时' : '添加自定义倒计时';
+        }
+
+        function openCustomCountdownModal(index = null) {
+            const countdowns = Array.isArray(appSettings.customCountdowns) ? appSettings.customCountdowns : [];
+            const isEditing = Number.isInteger(index) && index >= 0 && index < countdowns.length;
+            if (!isEditing && countdowns.length >= 5) {
+                showToast('最多添加5个自定义倒计时');
+                return;
+            }
+            editingCustomCountdownIndex = isEditing ? index : null;
+            const custom = isEditing ? countdowns[index] : {};
+            const todayKey = formatDateKey(new Date());
+            const nameInput = document.getElementById('custom-countdown-name');
+            const dateInput = document.getElementById('custom-countdown-date');
+            nameInput.value = custom.name || '';
+            dateInput.min = todayKey;
+            dateInput.value = custom.date || '';
+            document.getElementById('custom-countdown-modal-title').textContent = isEditing ? '修改自定义倒计时' : '添加自定义倒计时';
+            document.getElementById('delete-custom-countdown').classList.toggle('is-hidden', !isEditing);
+            document.getElementById('custom-countdown-modal').classList.add('show');
+            setTimeout(() => nameInput.focus(), 0);
+        }
+
+        function closeCustomCountdownModal() {
+            document.getElementById('custom-countdown-modal').classList.remove('show');
+            editingCustomCountdownIndex = null;
+        }
+
+        function saveCustomCountdown() {
+            const name = document.getElementById('custom-countdown-name').value.trim();
+            const date = document.getElementById('custom-countdown-date').value;
+            if (!name || !/^\d{4}-\d{2}-\d{2}$/.test(date)) {
+                showToast('请填写倒计时名称并选择日期');
+                return;
+            }
+            if (date < formatDateKey(new Date())) {
+                showToast('请选择今天或未来的日期');
+                return;
+            }
+            const countdowns = Array.isArray(appSettings.customCountdowns) ? [...appSettings.customCountdowns] : [];
+            const existing = editingCustomCountdownIndex === null ? null : countdowns[editingCustomCountdownIndex];
+            const countdown = { id: existing?.id || makeId('countdown'), name, date };
+            if (editingCustomCountdownIndex === null) {
+                if (countdowns.length >= 5) {
+                    showToast('最多添加5个自定义倒计时');
+                    return;
+                }
+                countdowns.push(countdown);
+            } else {
+                countdowns[editingCustomCountdownIndex] = countdown;
+            }
+            appSettings.customCountdowns = countdowns.slice(0, 5);
+            saveSettingsData();
+            closeCustomCountdownModal();
+            updateCountdowns();
+        }
+
+        function deleteCustomCountdown() {
+            if (editingCustomCountdownIndex === null) return;
+            const countdowns = Array.isArray(appSettings.customCountdowns) ? [...appSettings.customCountdowns] : [];
+            countdowns.splice(editingCustomCountdownIndex, 1);
+            appSettings.customCountdowns = countdowns;
+            saveSettingsData();
+            closeCustomCountdownModal();
+            updateCountdowns();
+        }
+
+        function parseLocalDateKey(key) {
+            const [year, month, day] = key.split('-').map(Number);
+            return new Date(year, month - 1, day);
+        }
+
+        function qingmingDay(year) {
+            const shortYear = year % 100;
+            return Math.floor(shortYear * 0.2422 + 4.81) - Math.floor((shortYear - 1) / 4);
+        }
+
+        function findLunarHoliday(year, lunarMonth, lunarDay) {
+            try {
+                const formatter = new Intl.DateTimeFormat('zh-CN-u-ca-chinese', { month: 'numeric', day: 'numeric' });
+                for (let date = new Date(year, 0, 1); date.getFullYear() === year; date.setDate(date.getDate() + 1)) {
+                    const parts = formatter.formatToParts(date);
+                    const month = Number(parts.find(part => part.type === 'month')?.value);
+                    const day = Number(parts.find(part => part.type === 'day')?.value);
+                    if (month === lunarMonth && day === lunarDay) return new Date(date);
+                }
+            } catch (_) { /* 不支持农历时仍保留固定法定节日 */ }
+            return null;
+        }
+
+        function buildStatutoryHolidays(year) {
+            if (KNOWN_HOLIDAY_PERIODS[year]) {
+                return KNOWN_HOLIDAY_PERIODS[year].map(item => ({ ...item, startDate: parseLocalDateKey(item.start), endDate: parseLocalDateKey(item.end) }));
+            }
+            const holidays = [
+                { name: '元旦', startDate: new Date(year, 0, 1) },
+                { name: '清明节', startDate: new Date(year, 3, qingmingDay(year)) },
+                { name: '劳动节', startDate: new Date(year, 4, 1) },
+                { name: '国庆节', startDate: new Date(year, 9, 1) }
+            ];
+            const lunarNewYear = findLunarHoliday(year, 1, 1);
+            const dragonBoat = findLunarHoliday(year, 5, 5);
+            const midAutumn = findLunarHoliday(year, 8, 15);
+            if (lunarNewYear) holidays.push({ name: '春节', startDate: lunarNewYear });
+            if (dragonBoat) holidays.push({ name: '端午节', startDate: dragonBoat });
+            if (midAutumn) holidays.push({ name: '中秋节', startDate: midAutumn });
+            return holidays.map(item => ({ ...item, endDate: item.startDate })).sort((a, b) => a.startDate - b.startDate);
+        }
+
+        function getNextStatutoryHoliday(now) {
+            for (let year = now.getFullYear(); year <= now.getFullYear() + 2; year++) {
+                const holidays = buildStatutoryHolidays(year);
+                for (const holiday of holidays) {
+                    if (now <= holiday.endDate) {
+                        const days = holiday.startDate <= now ? 0 : Math.round((holiday.startDate - now) / DAY_MS);
+                        return { name: holiday.name, days };
+                    }
+                }
+            }
+            return { name: '元旦', days: 0 };
+        }
+
+        function showPage(pageId, navItem) {
+            document.querySelectorAll('.page').forEach(page => page.classList.add('hidden'));
+            document.getElementById(`page-${pageId}`).classList.remove('hidden');
+            document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+            if (navItem) navItem.classList.add('active');
+            if (pageId === 'stats') renderStatsCalendar();
+        }
+
+        function isWithinCheckinWindow(type, now = new Date()) {
+            const minutes = now.getHours() * 60 + now.getMinutes();
+            const windowRange = CHECKIN_WINDOWS[type];
+            return minutes >= windowRange[0] && minutes <= windowRange[1];
+        }
+
+        function updateCheckinUI() {
+            ['am', 'pm', 'night'].forEach(type => {
+                const done = Boolean(checkinStatus[type]);
+                const icon = document.getElementById(`icon-${type}`);
+                const button = document.getElementById(`btn-${type}`);
+                icon.textContent = done ? '✅' : '⭕';
+                button.textContent = done ? '已完成' : '打卡';
+                button.disabled = done || !isWithinCheckinWindow(type);
+            });
+        }
+
+        function doCheckIn(type) {
+            if (checkinStatus[type] || !isWithinCheckinWindow(type)) return;
+            checkinStatus[type] = true;
+            checkinData[formatDateKey(new Date())] = { ...checkinStatus };
+            save('ddCheckins', checkinData);
+            updateCheckinUI();
+            renderStatsCalendar();
+        }
+
+        function renderSmallCalendar() {
+            const grid = document.getElementById('calendar-grid');
+            const year = currentCalendarDate.getFullYear();
+            const month = currentCalendarDate.getMonth();
+            const todayKey = formatDateKey(new Date());
+            document.getElementById('cal-month-label').textContent = `${year}年${month + 1}月`;
+            let html = ['日', '一', '二', '三', '四', '五', '六'].map(day => `<div class="cal-day-name">${day}</div>`).join('');
+            const firstWeekday = new Date(year, month, 1).getDay();
+            const totalDays = new Date(year, month + 1, 0).getDate();
+            for (let i = 0; i < firstWeekday; i++) html += '<div class="cal-day other-month"></div>';
+            for (let day = 1; day <= totalDays; day++) {
+                const key = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+                const classes = ['cal-day'];
+                if (key === todayKey) classes.push('today');
+                if (todos[key] && todos[key].length) classes.push('has-todo');
+                html += `<div class="${classes.join(' ')}">${day}</div>`;
+            }
+            grid.innerHTML = html;
+        }
+
+        function changeSmallCalendarMonth(diff) {
+            currentCalendarDate = new Date(currentCalendarDate.getFullYear(), currentCalendarDate.getMonth() + diff, 1);
+            renderSmallCalendar();
+        }
+
+        function renderRecentGoals() {
+            const list = document.getElementById('recent-goal-list');
+            let completed = 0;
+            if (!recentGoals.length) {
+                list.innerHTML = '<li class="empty-state">还没有近期待办，写下第一件要推进的事吧。</li>';
+            } else {
+                list.innerHTML = recentGoals.map((goal, index) => {
+                    if (goal.completed) completed++;
+                    return `<li class="todo-item ${goal.completed ? 'completed' : ''}" onclick="toggleRecentGoal(${index})">
+                        <span class="custom-checkbox"></span><span class="todo-text">${escapeHTML(goal.text)}</span>
+                        <span class="todo-delete" onclick="event.stopPropagation(); deleteRecentGoal(${index})">✕</span></li>`;
+                }).join('');
+            }
+            document.getElementById('goal-count').textContent = `${completed} / ${recentGoals.length} 完成`;
+        }
+
+        function handleGoalInput(event) { if (event.key === 'Enter') { event.preventDefault(); addRecentGoal(); } }
+        function addRecentGoal() {
+            const input = document.getElementById('new-goal-input');
+            const text = input.value.trim();
+            if (!text) return;
+            recentGoals.push({ id: makeId('goal'), text, completed: false, startDate: formatDateKey(new Date()), endDate: null });
+            save('ddRecentGoals', recentGoals);
+            input.value = '';
+            renderRecentGoals();
+            renderStatsCalendar();
+        }
+        function toggleRecentGoal(index) {
+            if (!recentGoals[index]) return;
+            recentGoals[index].completed = !recentGoals[index].completed;
+            recentGoals[index].endDate = recentGoals[index].completed ? formatDateKey(new Date()) : null;
+            save('ddRecentGoals', recentGoals);
+            renderRecentGoals();
+            renderStatsCalendar();
+        }
+        function deleteRecentGoal(index) {
+            recentGoals.splice(index, 1);
+            save('ddRecentGoals', recentGoals);
+            renderRecentGoals();
+            renderStatsCalendar();
+        }
+
+        function getTodayTodos() { return todos[formatDateKey(new Date())] || []; }
+        function renderTodos() {
+            const items = getTodayTodos();
+            const list = document.getElementById('todo-list');
+            if (!items.length) {
+                list.innerHTML = '<li class="empty-state">今天还没有记录完成事项。</li>';
+            } else {
+                list.innerHTML = items.map((item, index) => {
+                    return `<li class="todo-item completed-record">
+                        <span class="record-mark">✓</span><span class="todo-text">${escapeHTML(item.text)}</span>
+                        <span class="todo-delete" onclick="event.stopPropagation(); deleteTodo(${index})">✕</span></li>`;
+                }).join('');
+            }
+            document.getElementById('todo-count').textContent = `已记录 ${items.length} 项`;
+        }
+
+        function handleTodoInput(event) { if (event.key === 'Enter') { event.preventDefault(); addTodo(); } }
+        function addTodo() {
+            const input = document.getElementById('new-todo-input');
+            const text = input.value.trim();
+            if (!text) return;
+            const key = formatDateKey(new Date());
+            const id = makeId('todo');
+            if (!todos[key]) todos[key] = [];
+            todos[key].push({ id, text, completed: true, recordedAt: Date.now() });
+            saveTodos();
+            input.value = '';
+            renderTodos();
+            renderSmallCalendar();
+            renderStatsCalendar();
+        }
+
+        function deleteTodo(index) {
+            const key = formatDateKey(new Date());
+            const item = todos[key] && todos[key][index];
+            if (!item) return;
+            todos[key].splice(index, 1);
+            saveTodos();
+            renderTodos();
+            renderSmallCalendar();
+            renderStatsCalendar();
+        }
+
+        function selectSport(type, button) {
+            currentSportType = type;
+            document.querySelectorAll('.sport-option').forEach(option => option.classList.remove('active'));
+            button.classList.add('active');
+        }
+
+        function updateStopwatchDisplay() {
+            const hours = Math.floor(stopwatchTime / 3600);
+            const minutes = Math.floor((stopwatchTime % 3600) / 60);
+            const seconds = stopwatchTime % 60;
+            document.getElementById('sport-stopwatch').textContent = [hours, minutes, seconds].map(value => String(value).padStart(2, '0')).join(':');
+        }
+
+        function startStopwatch() {
+            if (stopwatchInterval) return;
+            stopwatchInterval = setInterval(() => { stopwatchTime++; updateStopwatchDisplay(); }, 1000);
+        }
+
+        function stopStopwatch() {
+            clearInterval(stopwatchInterval);
+            stopwatchInterval = null;
+            const minutes = Math.floor(stopwatchTime / 60);
+            if (minutes > 0) {
+                addSportTime(minutes, currentSportType);
+                showToast(`${SPORT_NAMES[currentSportType]}记录成功：${minutes}分钟`);
+            }
+            stopwatchTime = 0;
+            updateStopwatchDisplay();
+        }
+
+        function addManualSport() {
+            const input = document.getElementById('manual-sport-min');
+            const minutes = Number.parseInt(input.value, 10);
+            if (!Number.isFinite(minutes) || minutes <= 0) return;
+            addSportTime(minutes, currentSportType);
+            input.value = '';
+            showToast(`${SPORT_NAMES[currentSportType]}记录成功：${minutes}分钟`);
+        }
+
+        function formatMinutes(minutes) {
+            const total = Math.max(0, Math.round(Number(minutes) || 0));
+            if (total < 60) return `${total}分钟`;
+            const hours = Math.floor(total / 60);
+            const remain = total % 60;
+            return remain ? `${hours}小时${remain}分钟` : `${hours}小时`;
+        }
+
+        function ensureHistoryDay(key) {
+            if (!historyData[key]) historyData[key] = { focus: 0, sport: 0, activities: [] };
+            if (!Array.isArray(historyData[key].activities)) historyData[key].activities = [];
+            historyData[key].focus = Number(historyData[key].focus) || 0;
+            historyData[key].sport = Number(historyData[key].sport) || 0;
+            return historyData[key];
+        }
+
+        function updateLifeStatus() {
+            const day = historyData[formatDateKey(new Date())] || { focus: 0, sport: 0 };
+            const runningFocus = timerInterval && timerStartLeftSec !== null ? Math.max(0, Math.floor((timerStartLeftSec - timeLeft) / 60)) : 0;
+            const focusMinutes = (Number(day.focus) || 0) + runningFocus;
+            const sportMinutes = Number(day.sport) || 0;
+            document.getElementById('life-focus-hr').textContent = (focusMinutes / 60).toFixed(1);
+            document.getElementById('life-focus-min').textContent = `${focusMinutes} 分钟`;
+            document.getElementById('life-sport-hr').textContent = (sportMinutes / 60).toFixed(1);
+            document.getElementById('life-sport-min').textContent = `${sportMinutes} 分钟`;
+        }
+
+        function addSportTime(minutes, type) {
+            const key = formatDateKey(new Date());
+            const day = ensureHistoryDay(key);
+            day.sport += minutes;
+            day.activities.push({ type, name: SPORT_NAMES[type] || '运动', minutes, at: Date.now() });
+            saveHistoryData();
+            updateLifeStatus();
+            renderStatsCalendar();
+        }
+
+        function addFocusTime(minutes) {
+            const key = formatDateKey(new Date());
+            const day = ensureHistoryDay(key);
+            day.focus += minutes;
+            day.activities.push({ type: 'focus', name: '番茄专注', minutes, at: Date.now() });
+            saveHistoryData();
+            updateLifeStatus();
+            renderStatsCalendar();
+        }
+
+        function setTimer(minutes) {
+            clearInterval(timerInterval);
+            timerInterval = null;
+            timerEndTs = null;
+            timerStartLeftSec = null;
+            currentMode = minutes;
+            timeLeft = minutes * 60;
+            updateTimerModeButtons();
+            updateTimerDisplay();
+        }
+
+        function updateTimerModeButtons() {
+            document.querySelectorAll('.timer-mode').forEach(button => {
+                button.classList.toggle('ghost-btn', Number(button.dataset.minutes) !== currentMode);
+            });
+        }
+
+        function updateTimerDisplay() {
+            const minutes = Math.floor(timeLeft / 60);
+            const seconds = timeLeft % 60;
+            document.getElementById('timer-display').textContent = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+            const elapsed = Math.max(0, currentMode * 60 - timeLeft);
+            const degrees = currentMode > 0 ? (elapsed / (currentMode * 60)) * 360 : 0;
+            document.getElementById('timer-ring').style.setProperty('--timer-progress', `${degrees}deg`);
+        }
+
+        function syncTimerFromClock() {
+            if (!timerEndTs) return;
+            timeLeft = Math.max(0, Math.ceil((timerEndTs - Date.now()) / 1000));
+            updateTimerDisplay();
+            updateLifeStatus();
+            if (timeLeft <= 0) {
+                clearInterval(timerInterval);
+                timerInterval = null;
+                timerEndTs = null;
+                timerStartLeftSec = null;
+                addFocusTime(currentMode);
+                playSound();
+                showToast(`专注完成：${currentMode}分钟`);
+            }
+        }
+
+        function startTimer() {
+            if (timerInterval || timeLeft <= 0) return;
+            timerStartLeftSec = timeLeft;
+            timerEndTs = Date.now() + timeLeft * 1000;
+            timerInterval = setInterval(syncTimerFromClock, 250);
+            syncTimerFromClock();
+        }
+
+        function pauseTimer() {
+            if (timerEndTs) syncTimerFromClock();
+            clearInterval(timerInterval);
+            timerInterval = null;
+            timerEndTs = null;
+            timerStartLeftSec = null;
+            updateLifeStatus();
+        }
+
+        function playSound() {
+            try {
+                const context = new (window.AudioContext || window.webkitAudioContext)();
+                const oscillator = context.createOscillator();
+                const gain = context.createGain();
+                oscillator.connect(gain); gain.connect(context.destination);
+                oscillator.frequency.value = 800;
+                gain.gain.setValueAtTime(.45, context.currentTime);
+                gain.gain.exponentialRampToValueAtTime(.001, context.currentTime + 1);
+                oscillator.start(); oscillator.stop(context.currentTime + 1);
+            } catch (_) { /* 音频不可用不影响记录 */ }
+        }
+
+        function getTodayHealth(create = false) {
+            const key = formatDateKey(new Date());
+            if (create && !healthData[key]) healthData[key] = { sleep: false, meal: false, medicine: false };
+            return healthData[key] || null;
+        }
+
+        function renderHealth() {
+            const data = getTodayHealth(false) || {};
+            ['sleep', 'meal', 'medicine'].forEach(type => {
+                const row = document.getElementById(`health-${type}`);
+                row.classList.toggle('done', Boolean(data[type]));
+                row.querySelector('.health-check').textContent = data[type] ? '✓' : '';
+            });
+            const mood = Number.isFinite(Number(data.mood)) ? Number(data.mood) : 50;
+            document.getElementById('mood-slider').value = mood;
+            previewMood(mood);
+        }
+
+        function toggleHealth(type) {
+            const data = getTodayHealth(true);
+            data[type] = !data[type];
+            save('ddHealthData', healthData);
+            renderHealth();
+        }
+
+        function moodState(score) {
+            const value = Math.max(0, Math.min(100, Math.round(Number(score) || 0)));
+            if (value === 100) return { emoji: '🤩', label: '超级开心' };
+            if (value >= 90) return { emoji: '😁', label: '开心' };
+            if (value >= 80) return { emoji: '😄', label: '快乐' };
+            if (value >= 70) return { emoji: '😊', label: '愉快' };
+            if (value >= 60) return { emoji: '🙂', label: '不错' };
+            if (value >= 50) return { emoji: '😐', label: '平静' };
+            if (value >= 40) return { emoji: '😕', label: '一般' };
+            if (value >= 30) return { emoji: '😣', label: '郁闷' };
+            if (value >= 20) return { emoji: '😔', label: '低落' };
+            if (value >= 10) return { emoji: '😢', label: '难过' };
+            return { emoji: '😞', label: '沮丧' };
+        }
+
+        function moodEmoji(score) {
+            return moodState(score).emoji;
+        }
+
+        function previewMood(value) {
+            const score = Number(value);
+            const state = moodState(score);
+            document.getElementById('mood-score').textContent = `${state.emoji} ${score}分 · ${state.label}`;
+        }
+
+        function saveMood(value) {
+            const data = getTodayHealth(true);
+            data.mood = Number(value);
+            save('ddHealthData', healthData);
+            previewMood(value);
+            renderStatsCalendar();
+        }
+
+        function fallbackAlmanac(date) {
+            const key = formatDateKey(date);
+            const index = Array.from(key).reduce((sum, char) => sum + char.charCodeAt(0), 0) % ALMANAC_FALLBACKS.length;
+            return { ...ALMANAC_FALLBACKS[index], source: '本地万年历参考', date: key };
+        }
+
+        function renderAlmanac(record) {
+            const yi = record?.yi || '规划今日、整理环境、保持专注';
+            const ji = record?.ji || '拖延冲动、熬夜透支、仓促决定';
+            const yiElement = document.getElementById('almanac-yi');
+            const jiElement = document.getElementById('almanac-ji');
+            yiElement.textContent = yi;
+            jiElement.textContent = ji;
+            yiElement.title = yi;
+            jiElement.title = ji;
+            document.getElementById('almanac-source').textContent = record?.source || '万年历今日宜忌';
+        }
+
+        async function loadTodayAlmanac() {
+            const now = new Date();
+            const key = formatDateKey(now);
+            renderAlmanac(almanacRecords[key] || fallbackAlmanac(now));
+            const controller = new AbortController();
+            const timeout = setTimeout(() => controller.abort(), 10000);
+            try {
+                const url = `https://api.tiax.cn/almanac/?year=${now.getFullYear()}&month=${now.getMonth() + 1}&day=${now.getDate()}`;
+                const response = await fetch(url, { signal: controller.signal, cache: 'no-store' });
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                const data = await response.json();
+                const yi = String(data['宜'] || '').trim();
+                const ji = String(data['忌'] || '').trim();
+                if (!yi || !ji) throw new Error('宜忌数据不完整');
+                const record = { yi, ji, source: '万年历在线数据 · 已更新', date: key, updatedAt: Date.now() };
+                almanacRecords[key] = record;
+                save('ddAlmanacRecords', almanacRecords);
+                renderAlmanac(record);
+            } catch (_) {
+                renderAlmanac(almanacRecords[key] || fallbackAlmanac(now));
+            } finally {
+                clearTimeout(timeout);
+            }
+        }
+
+        function changeStatsMonth(diff) {
+            statsCalendarDate = new Date(statsCalendarDate.getFullYear(), statsCalendarDate.getMonth() + diff, 1);
+            renderStatsCalendar();
+        }
+
+        function pickStatsMonth(value) {
+            if (!/^\d{4}-\d{2}$/.test(value)) return;
+            const [year, month] = value.split('-').map(Number);
+            statsCalendarDate = new Date(year, month - 1, 1);
+            renderStatsCalendar();
+        }
+
+        function getSportEntries(history) {
+            const groups = new Map();
+            const activities = Array.isArray(history.activities) ? history.activities : [];
+            activities.filter(item => item.type !== 'focus').forEach(item => {
+                const name = item.name || SPORT_NAMES[item.type] || '运动';
+                groups.set(name, (groups.get(name) || 0) + (Number(item.minutes) || 0));
+            });
+            if (groups.size) return Array.from(groups, ([name, minutes]) => ({ name, minutes }));
+            const total = Number(history.sport) || 0;
+            return total > 0 ? [{ name: '运动', minutes: total }] : [];
+        }
+
+        function canEditStatsDate(dateKey) {
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            const yesterday = new Date(today);
+            yesterday.setDate(yesterday.getDate() - 1);
+            return dateKey === formatDateKey(today) || dateKey === formatDateKey(yesterday);
+        }
+
+        function toggleDayEdit(dateKey, event) {
+            event?.stopPropagation();
+            if (!canEditStatsDate(dateKey)) return;
+            editingDateKey = editingDateKey === dateKey ? '' : dateKey;
+            renderStatsCalendar();
+        }
+
+        function deleteDayRecord(dateKey, type, event) {
+            event?.stopPropagation();
+            if (!canEditStatsDate(dateKey)) return;
+            if (type === 'mood') {
+                if (healthData[dateKey]) delete healthData[dateKey].mood;
+                save('ddHealthData', healthData);
+            } else if (historyData[dateKey]) {
+                const day = historyData[dateKey];
+                const activities = Array.isArray(day.activities) ? day.activities : [];
+                if (type === 'sport') {
+                    day.sport = 0;
+                    day.activities = activities.filter(item => item.type === 'focus');
+                } else if (type === 'focus') {
+                    day.focus = 0;
+                    day.activities = activities.filter(item => item.type !== 'focus');
+                }
+                saveHistoryData();
+            }
+            if (dateKey === formatDateKey(new Date())) {
+                renderHealth();
+                updateLifeStatus();
+            }
+            renderStatsCalendar();
+        }
+
+        function saveEditedCompletion(dateKey, index, value) {
+            if (!canEditStatsDate(dateKey)) return;
+            const item = todos[dateKey] && todos[dateKey][index];
+            if (!item) return;
+            const text = String(value || '').trim();
+            if (text) item.text = text;
+            saveTodos();
+            if (dateKey === formatDateKey(new Date())) renderTodos();
+        }
+
+        function deleteDayCompletion(dateKey, index, event) {
+            event?.stopPropagation();
+            if (!canEditStatsDate(dateKey) || !todos[dateKey]?.[index]) return;
+            todos[dateKey].splice(index, 1);
+            saveTodos();
+            if (dateKey === formatDateKey(new Date())) renderTodos();
+            renderSmallCalendar();
+            renderStatsCalendar();
+        }
+
+        function addDayCompletion(dateKey, input, event) {
+            event?.stopPropagation();
+            if (!canEditStatsDate(dateKey)) return;
+            const text = String(input?.value || '').trim();
+            if (!text) return;
+            if (!Array.isArray(todos[dateKey])) todos[dateKey] = [];
+            todos[dateKey].push({ id: makeId('todo'), text, completed: true, recordedAt: Date.now() });
+            saveTodos();
+            input.value = '';
+            if (dateKey === formatDateKey(new Date())) renderTodos();
+            renderSmallCalendar();
+            renderStatsCalendar();
+        }
+
+        function handleDayCompletionInput(event, dateKey, input) {
+            event.stopPropagation();
+            if (event.key === 'Enter') {
+                event.preventDefault();
+                addDayCompletion(dateKey, input, event);
+            }
+        }
+
+        function closeDayEditWhenClickingOutside(event) {
+            if (!editingDateKey || !event.target?.closest) return;
+            const activeCell = event.target.closest(`[data-date="${editingDateKey}"]`);
+            if (!activeCell) {
+                editingDateKey = '';
+                renderStatsCalendar();
+            }
+        }
+
+        function equalizeStatsDayHeights(container) {
+            if (!container?.querySelectorAll) return;
+            const dayCells = Array.from(container.querySelectorAll('.stats-day:not(.blank)'));
+            dayCells.forEach(cell => { cell.style.height = 'auto'; });
+            const tallestHeight = Math.max(0, ...dayCells.map(cell => cell.offsetHeight));
+            if (!tallestHeight) return;
+            dayCells.forEach(cell => { cell.style.height = `${tallestHeight}px`; });
+        }
+
+        function renderStatsCalendar() {
+            const container = document.getElementById('stats-calendar');
+            if (!container) return;
+            const year = statsCalendarDate.getFullYear();
+            const month = statsCalendarDate.getMonth();
+            document.getElementById('stats-month-picker').value = `${year}-${String(month + 1).padStart(2, '0')}`;
+            const weekdays = ['星期一', '星期二', '星期三', '星期四', '星期五', '星期六', '星期日'];
+            let html = weekdays.map(day => `<div class="stats-weekday">${day}</div>`).join('');
+            const firstWeekday = (new Date(year, month, 1).getDay() + 6) % 7;
+            const totalDays = new Date(year, month + 1, 0).getDate();
+            const today = new Date();
+            const todayKey = formatDateKey(today);
+            for (let i = 0; i < firstWeekday; i++) html += '<div class="stats-day blank"></div>';
+            for (let day = 1; day <= totalDays; day++) {
+                const date = new Date(year, month, day);
+                const key = formatDateKey(date);
+                const health = healthData[key] || {};
+                const dayTodos = Array.isArray(todos[key]) ? todos[key] : [];
+                const history = historyData[key] || {};
+                const isFuture = date > new Date(today.getFullYear(), today.getMonth(), today.getDate());
+                const canEdit = canEditStatsDate(key);
+                const editing = canEdit && editingDateKey === key;
+                const moodExists = Number.isFinite(Number(health.mood));
+                const moodDelete = editing && moodExists ? `<button class="record-delete" onclick="deleteDayRecord('${key}','mood',event)" title="删除心情记录">×</button>` : '';
+                const mood = moodState(health.mood);
+                const moodHtml = `<div class="mood-chip ${moodExists ? '' : 'no-record'}">${moodExists ? `${mood.emoji} 当日心情：${Number(health.mood)}分，${mood.label}` : '😐 当日心情：暂无记录'}${moodDelete}</div>`;
+                const sportEntries = getSportEntries(history);
+                const sportDelete = editing && sportEntries.length ? `<button class="record-delete" onclick="deleteDayRecord('${key}','sport',event)" title="删除运动记录">×</button>` : '';
+                const focusMinutes = Number(history.focus) || 0;
+                const focusDelete = editing && focusMinutes > 0 ? `<button class="record-delete" onclick="deleteDayRecord('${key}','focus',event)" title="删除专注记录">×</button>` : '';
+                const sportDetails = sportEntries.length
+                    ? sportEntries.map(item => `${escapeHTML(item.name)} ${formatMinutes(item.minutes)}`).join('<br>')
+                    : '下次一定！';
+                const activityHtml = `<div class="record-grid">
+                    <div class="record-block sport"><div class="record-block-title">🏋️ 运动打卡</div><div class="record-block-value">${sportDetails}</div>${sportDelete}</div>
+                    <div class="record-block focus"><div class="record-block-title">🍅 专注时间</div><div class="record-block-value">${focusMinutes > 0 ? formatMinutes(focusMinutes) : '快去学习！'}</div>${focusDelete}</div>
+                </div>`;
+                const todosHtml = dayTodos.length
+                    ? `<ul class="day-todos">${dayTodos.map((item, index) => `<li><span>✓</span>${editing
+                        ? `<span class="editable-completion" contenteditable="true" spellcheck="false" onclick="event.stopPropagation()" onblur="saveEditedCompletion('${key}',${index},this.textContent)">${escapeHTML(item.text)}</span><button class="completion-delete" onclick="deleteDayCompletion('${key}',${index},event)" title="删除这条记录">×</button>`
+                        : `<span>${escapeHTML(item.text)}</span>`}</li>`).join('')}</ul>`
+                    : `<div class="no-record" style="margin-top:8px;">${isFuture ? '尚未到来' : '没有今日完成记录'}</div>`;
+                const addCompletionHtml = editing ? `<div class="day-completion-add">
+                    <input type="text" maxlength="100" placeholder="添加记录，按回车" onclick="event.stopPropagation()" onkeydown="handleDayCompletionInput(event,'${key}',this)">
+                    <button onclick="addDayCompletion('${key}',this.previousElementSibling,event)" title="添加记录">+</button>
+                </div>` : '';
+                const editButton = canEdit ? `<button class="day-edit-btn" onclick="toggleDayEdit('${key}',event)" title="编辑这一天">🖊</button>` : '';
+                html += `<div class="stats-day ${isFuture ? 'future' : ''} ${editing ? 'editing' : ''}" data-date="${key}">
+                    <div class="stats-date ${key === todayKey ? 'today' : ''}"><span>${day}</span>${editButton}</div>
+                    ${moodHtml}${activityHtml}<div class="stats-section-title">今日完成</div><div class="day-completions">${todosHtml}${addCompletionHtml}</div>
+                </div>`;
+            }
+            container.innerHTML = html;
+            equalizeStatsDayHeights(container);
+        }
+
+        function refreshForNewDay() {
+            activeDateKey = formatDateKey(new Date());
+            currentCalendarDate = new Date();
+            checkinStatus = checkinData[activeDateKey] || { am: false, pm: false, night: false };
+            updateCheckinUI();
+            updateCountdowns();
+            renderSmallCalendar();
+            renderTodos();
+            renderHealth();
+            updateLifeStatus();
+            renderStatsCalendar();
+            loadTodayAlmanac();
+        }
+
+        function initialize() {
+            loadData();
+            activeDateKey = formatDateKey(new Date());
+            checkinStatus = checkinData[activeDateKey] || { am: false, pm: false, night: false };
+            applyAppName();
+            updateTime();
+            updateCountdowns();
+            updateCheckinUI();
+            renderSmallCalendar();
+            renderRecentGoals();
+            renderTodos();
+            renderHealth();
+            updateTimerDisplay();
+            updateLifeStatus();
+            renderStatsCalendar();
+            renderAlmanac(almanacRecords[activeDateKey] || fallbackAlmanac(new Date()));
+            appReady = true;
+            initializeCloudSync();
+            loadTodayAlmanac();
+            setInterval(updateTime, 1000);
+        }
+
+        document.addEventListener('click', closeDayEditWhenClickingOutside);
+        document.addEventListener('visibilitychange', () => {
+            if (document.visibilityState === 'visible' && cloudSession && Date.now() - lastCloudPullAt > 10000) {
+                pullCloudData(false, true);
+            }
+        });
+        window.addEventListener('focus', () => {
+            if (cloudSession && Date.now() - lastCloudPullAt > 10000) pullCloudData(false, true);
+        });
+        initialize();
+    </script>
+</body>
+</html>
