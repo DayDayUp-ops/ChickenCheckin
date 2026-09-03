@@ -1,12 +1,13 @@
 {
   "name": "xiaoshuai-checkin-cloudflare-pages",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "private": true,
   "type": "module",
   "engines": {
     "node": ">=20"
   },
   "scripts": {
-    "build": "node scripts/build-pages.mjs"
+    "build": "node scripts/build-pages.mjs",
+    "test:integration": "node test/integration-v2.mjs"
   }
 }

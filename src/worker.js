@@ -1,4 +1,3 @@
-const MAX_USERS = 50;
 const SESSION_SECONDS = 30 * 24 * 60 * 60;
 const MAX_DATA_BYTES = 1_500_000;
 const AUTH_WINDOW_SECONDS = 15 * 60;
@@ -56,6 +55,10 @@ async function passwordHash(password, salt, pepper) {
     'raw', encoder.encode(pepper), { name: 'HMAC', hash: 'SHA-256' }, false, ['sign'],
   );
   return toBase64Url(await crypto.subtle.sign('HMAC', key, encoder.encode(`${salt}\0${password}`)));
+}
+
+function validPassword(password) {
+  return typeof password === 'string' && password.length >= 6 && password.length <= 128;
 }
 
 async function authAttemptKey(request, kind, username) {
@@ -142,12 +145,10 @@ async function register(request, env) {
   if (!env.INVITE_CODE || !env.AUTH_PEPPER) return error('服务器尚未配置同步密钥', 503, 'server_not_configured');
   if (!(await secureEqual(inviteCode, env.INVITE_CODE))) {
     await recordAuthFailure(env, attemptKey);
-    return error('管理员邀请码不正确', 403, 'invalid_invite');
+    return error('邀请码不正确', 403, 'invalid_invite');
   }
-  if (!validUsername(username)) return error('同步名称须为2–30个汉字、字母、数字、下划线或短横线');
-  if (password.length < 10 || password.length > 128) return error('私人密码长度须为10–128位');
-  const countRow = await env.DB.prepare('SELECT COUNT(*) AS count FROM users').first();
-  if (Number(countRow?.count || 0) >= MAX_USERS) return error('已达到50名用户上限', 409, 'user_limit_reached');
+  if (!validUsername(username)) return error('同步账号须为2–30个汉字、字母、数字、下划线或短横线');
+  if (!validPassword(password)) return error('同步密码长度须为6–128位');
   const salt = randomToken(18);
   const hash = await passwordHash(password, salt, env.AUTH_PEPPER);
   try {
@@ -160,8 +161,7 @@ async function register(request, env) {
     return json({ ok: true, username, ...session }, 201);
   } catch (caught) {
     const message = String(caught?.message || caught);
-    if (message.includes('UNIQUE')) return error('该同步名称已存在', 409, 'username_exists');
-    if (message.includes('user_limit_reached')) return error('已达到50名用户上限', 409, 'user_limit_reached');
+    if (message.includes('UNIQUE')) return error('该同步账号已存在', 409, 'username_exists');
     throw caught;
   }
 }
@@ -177,13 +177,50 @@ async function login(request, env) {
     .bind(username).first();
   if (!user || !env.AUTH_PEPPER) {
     await recordAuthFailure(env, attemptKey);
-    return error('同步名称或私人密码不正确', 401, 'invalid_credentials');
+    return error('同步账号或同步密码不正确', 401, 'invalid_credentials');
   }
   const candidate = await passwordHash(password, user.salt, env.AUTH_PEPPER);
   if (!(await secureEqual(candidate, user.hash))) {
     await recordAuthFailure(env, attemptKey);
-    return error('同步名称或私人密码不正确', 401, 'invalid_credentials');
+    return error('同步账号或同步密码不正确', 401, 'invalid_credentials');
   }
+  await clearAuthFailures(env, attemptKey);
+  const session = await createSession(env, Number(user.id));
+  return json({ ok: true, username: user.username, ...session });
+}
+
+async function resetPassword(request, env) {
+  const body = await readBody(request);
+  const username = String(body.username || '').trim();
+  const recoveryCode = String(body.recoveryCode || '').trim();
+  const newPassword = String(body.newPassword || '');
+  const attemptKey = await authAttemptKey(request, 'reset', username);
+  const blocked = await ensureAuthAllowed(env, attemptKey);
+  if (blocked) return blocked;
+  if (!validUsername(username)) return error('请输入正确的同步账号');
+  if (!validPassword(newPassword)) return error('新密码长度须为6–128位');
+  if (!recoveryCode) return error('请输入恢复码');
+  if (!env.AUTH_PEPPER || !env.RECOVERY_CODE) return error('服务器尚未配置密码恢复功能', 503, 'server_not_configured');
+
+  if (!(await secureEqual(recoveryCode, env.RECOVERY_CODE))) {
+    await recordAuthFailure(env, attemptKey);
+    return error('同步账号或恢复码不正确', 401, 'invalid_recovery');
+  }
+
+  const user = await env.DB.prepare('SELECT id, username FROM users WHERE username = ? COLLATE NOCASE')
+    .bind(username).first();
+  if (!user) {
+    await recordAuthFailure(env, attemptKey);
+    return error('同步账号或恢复码不正确', 401, 'invalid_recovery');
+  }
+
+  const passwordSalt = randomToken(18);
+  const passwordHashValue = await passwordHash(newPassword, passwordSalt, env.AUTH_PEPPER);
+  await env.DB.batch([
+    env.DB.prepare('UPDATE users SET password_salt = ?, password_hash = ? WHERE id = ?')
+      .bind(passwordSalt, passwordHashValue, user.id),
+    env.DB.prepare('DELETE FROM sessions WHERE user_id = ?').bind(user.id),
+  ]);
   await clearAuthFailures(env, attemptKey);
   const session = await createSession(env, Number(user.id));
   return json({ ok: true, username: user.username, ...session });
@@ -241,6 +278,7 @@ async function api(request, env, url) {
     }
     if (request.method === 'POST' && url.pathname === '/api/register') return register(request, env);
     if (request.method === 'POST' && url.pathname === '/api/login') return login(request, env);
+    if (request.method === 'POST' && url.pathname === '/api/reset-password') return resetPassword(request, env);
     const auth = await authenticate(request, env);
     if (!auth) return error('请先登录云同步', 401, 'unauthorized');
     if (request.method === 'POST' && url.pathname === '/api/logout') return logout(request, env, auth);

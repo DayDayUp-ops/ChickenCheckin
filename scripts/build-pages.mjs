@@ -27,5 +27,13 @@ const html = await readFile(resolve(outputDir, 'index.html'), 'utf8');
 if (!html.includes('id="cloud-sync-button"')) {
   throw new Error('Cloud sync UI is missing from the Pages output.');
 }
+if (!html.includes('id="cloud-reset-panel"') || !html.includes('placeholder="至少6位"')) {
+  throw new Error('Cloud password recovery UI is missing from the Pages output.');
+}
+
+const worker = await readFile(resolve(outputDir, '_worker.js'), 'utf8');
+if (!worker.includes("'/api/reset-password'") || !worker.includes('env.RECOVERY_CODE')) {
+  throw new Error('Cloud password recovery API is missing from the Pages output.');
+}
 
 console.log(`Built Cloudflare Pages output: ${outputDir}`);

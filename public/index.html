@@ -10,14 +10,14 @@
             --primary-color: #3498db;
             --primary-dark: #2477b3;
             --primary-soft: #eaf5fd;
-            --bg-color: #f0f8ff;
+            --bg-color: #eaf5fc;
             --card-bg: #ffffff;
-            --text-color: #2c3e50;
-            --muted-color: #7f8c9a;
+            --text-color: #203647;
+            --muted-color: #607586;
             --success-color: #27ae60;
             --danger-color: #e74c3c;
-            --border-color: #d6eaf8;
-            --shadow: 0 8px 28px rgba(52, 152, 219, 0.08);
+            --border-color: #bddced;
+            --shadow: 0 8px 28px rgba(52, 152, 219, 0.12);
         }
 
         * { box-sizing: border-box; }
@@ -80,6 +80,17 @@
         .sidebar-tools { margin-top: auto; padding-top: 18px; border-top: 1px solid var(--border-color); display: grid; gap: 8px; }
         .sidebar-tool-btn { width: 100%; padding: 10px 12px; border: 1px solid var(--border-color); border-radius: 9px; background: var(--bg-color); color: var(--text-color); cursor: pointer; font-size: 13px; text-align: left; }
         .sidebar-tool-btn:hover { border-color: var(--primary-color); background: var(--primary-soft); }
+        .theme-picker { margin-bottom: 2px; padding: 10px 11px; border: 1px solid var(--border-color); border-radius: 10px; background: #fff; }
+        .theme-picker-title { margin-bottom: 8px; color: var(--muted-color); font-size: 11px; }
+        .theme-swatches { display: flex; align-items: center; justify-content: space-between; gap: 7px; }
+        .theme-swatch { width: 24px; height: 24px; padding: 0; border: 3px solid #fff; border-radius: 50%; cursor: pointer; box-shadow: 0 0 0 1px #cfdbe3; transition: transform .15s, box-shadow .15s; }
+        .theme-swatch:hover { transform: scale(1.1); }
+        .theme-swatch.active { box-shadow: 0 0 0 2px var(--text-color); transform: scale(1.08); }
+        .theme-swatch[data-theme="blue"] { background: #3498db; }
+        .theme-swatch[data-theme="mint"] { background: #2fa989; }
+        .theme-swatch[data-theme="violet"] { background: #8067c9; }
+        .theme-swatch[data-theme="peach"] { background: #e88955; }
+        .theme-swatch[data-theme="rose"] { background: #d85d83; }
         .hidden-file-input { display: none; }
 
         .main-content { flex: 1; min-width: 0; padding: 30px 40px 50px; }
@@ -87,9 +98,9 @@
 
         .header-info {
             display: grid;
-            grid-template-columns: 390px minmax(0, 1fr);
-            gap: 20px;
-            margin-bottom: 30px;
+            grid-template-columns: 350px minmax(0, 1fr);
+            gap: 16px;
+            margin-bottom: 24px;
         }
         .time-card, .countdown-card, .card, .life-card {
             background: var(--card-bg);
@@ -97,8 +108,8 @@
             box-shadow: var(--shadow);
         }
         .time-card {
-            min-height: 164px;
-            padding: 18px;
+            min-height: 138px;
+            padding: 14px;
             border-radius: 16px;
             display: flex;
             flex-direction: column;
@@ -108,18 +119,10 @@
         }
         .current-time {
             color: var(--primary-color);
-            font: 800 29px/1.1 "SFMono-Regular", Consolas, monospace;
+            font: 800 26px/1.1 "SFMono-Regular", Consolas, monospace;
         }
         .current-date { margin-top: 7px; color: var(--muted-color); font-size: 12px; }
-        .almanac-box {
-            margin-top: 9px;
-            padding-top: 9px;
-            width: 100%;
-            border-top: 1px dashed var(--border-color);
-            display: grid;
-            gap: 6px;
-            text-align: left;
-        }
+        .almanac-box { display: grid; gap: 7px; text-align: left; }
         .almanac-row { display: flex; align-items: flex-start; gap: 7px; color: #5f7487; font-size: 12px; line-height: 1.45; }
         .almanac-badge { width: 22px; height: 22px; flex: 0 0 22px; display: grid; place-items: center; border-radius: 6px; color: #fff; font-weight: 800; }
         .almanac-row.yi .almanac-badge { background: var(--success-color); }
@@ -131,7 +134,7 @@
         .countdown-card {
             flex: 1 1 130px;
             min-width: 0;
-            padding: 20px 14px;
+            padding: 14px 12px;
             border-radius: 16px;
             display: flex;
             flex-direction: column;
@@ -139,11 +142,17 @@
             justify-content: center;
             text-align: center;
         }
-        .cd-label { margin-bottom: 8px; color: var(--muted-color); font-size: 13px; }
-        .cd-val { color: var(--text-color); font-size: 22px; font-weight: 800; }
+        .weekday-countdown-card { position: relative; }
+        .weekday-edit-btn { position: absolute; top: 7px; right: 8px; padding: 3px 5px; border: 0; border-radius: 6px; background: transparent; cursor: pointer; font-size: 14px; opacity: 0; transition: .2s; }
+        .weekday-countdown-card:hover .weekday-edit-btn, .weekday-edit-btn:focus-visible, .weekday-countdown-card.editing .weekday-edit-btn { opacity: 1; }
+        .weekday-edit-btn:hover { background: var(--primary-soft); }
+        .weekday-picker { display: none; width: 100%; margin-top: 8px; padding: 5px 7px; border: 1px solid var(--border-color); border-radius: 8px; background: #fff; color: var(--text-color); font-size: 11px; }
+        .weekday-countdown-card.editing .weekday-picker { display: block; }
+        .cd-label { margin-bottom: 7px; color: var(--muted-color); font-size: 12px; }
+        .cd-val { color: var(--text-color); font-size: 20px; font-weight: 800; }
         .custom-countdown-card { cursor: pointer; }
         .custom-countdown-card:hover { border-color: var(--primary-color); transform: translateY(-1px); }
-        .add-countdown-card { flex: 0 0 58px; min-width: 58px; padding: 0; color: var(--primary-color); font-size: 32px; font-weight: 400; cursor: pointer; }
+        .add-countdown-card { flex: 0 0 52px; min-width: 52px; padding: 0; color: var(--primary-color); font-size: 28px; font-weight: 400; cursor: pointer; }
         .add-countdown-card:hover { border-color: var(--primary-color); background: var(--primary-soft); }
         .add-countdown-card:disabled { color: #b6c1c9; cursor: not-allowed; opacity: .65; }
         .add-countdown-card:disabled:hover { border-color: var(--border-color); background: var(--card-bg); }
@@ -164,11 +173,14 @@
         .checkin-name { font-weight: 800; }
         .checkin-deadline { margin: 5px 0 15px; color: var(--muted-color); font-size: 12px; }
         .status-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; }
-        .status-panel { padding: 22px; border-radius: 13px; background: var(--bg-color); text-align: center; }
+        .status-panel { position: relative; padding: 22px; border: 1px solid var(--border-color); border-radius: 13px; background: var(--bg-color); text-align: center; }
         .status-label { margin-bottom: 8px; color: var(--muted-color); font-size: 12px; }
         .status-value { color: var(--primary-color); font-size: 34px; font-weight: 850; }
         .status-unit { margin-left: 4px; color: var(--muted-color); font-size: 14px; }
-        .status-detail { margin-top: 5px; color: #a0adb6; font-size: 12px; }
+        .status-detail { margin-top: 5px; color: #687e8e; font-size: 12px; }
+        .status-edit-btn { position: absolute; top: 10px; right: 11px; width: 29px; height: 29px; padding: 0; border: 0; border-radius: 8px; background: #fff; color: var(--primary-dark); cursor: pointer; font-size: 15px; opacity: 0; pointer-events: none; box-shadow: 0 2px 8px rgba(31,54,71,.1); transition: opacity .18s, transform .18s; }
+        .status-panel:hover .status-edit-btn, .status-edit-btn:focus-visible { opacity: 1; pointer-events: auto; }
+        .status-edit-btn:hover { transform: translateY(-1px); }
         .primary-btn {
             border: 0;
             border-radius: 9px;
@@ -192,8 +204,10 @@
         .icon-btn:hover { color: var(--primary-color); }
         .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; text-align: center; }
         .cal-day-name { padding-bottom: 5px; color: var(--muted-color); font-size: 11px; }
-        .cal-day { position: relative; padding: 8px 0; border-radius: 7px; font-size: 12px; }
+        .cal-day { position: relative; padding: 8px 0; border: 0; border-radius: 7px; background: transparent; color: var(--text-color); font: inherit; font-size: 12px; cursor: pointer; }
+        .cal-day:hover { background: #fff; color: var(--primary-dark); box-shadow: inset 0 0 0 1px var(--border-color); }
         .cal-day.today { background: var(--primary-color); color: #fff; font-weight: 800; }
+        .cal-day.selected:not(.today) { background: #fff; color: var(--primary-dark); font-weight: 850; box-shadow: inset 0 0 0 2px var(--primary-color); }
         .cal-day.has-todo:not(.today)::after {
             content: "";
             width: 4px;
@@ -208,6 +222,12 @@
         .cal-day.other-month { opacity: .2; }
 
         .goal-panel { min-width: 0; }
+        .goal-label-actions { display: flex; align-items: center; gap: 8px; }
+        .goal-back-btn { padding: 4px 8px; border: 1px solid var(--border-color); border-radius: 7px; background: #fff; color: var(--primary-dark); cursor: pointer; font-size: 11px; }
+        .goal-back-btn.hidden { display: none; }
+        .todo-edit { margin-left: 5px; padding: 3px 5px; color: #9babb6; cursor: pointer; opacity: 0; transition: .2s; }
+        .todo-item:hover .todo-edit { opacity: 1; }
+        .todo-edit:hover { color: var(--primary-color); transform: scale(1.12); }
         .section-label {
             display: flex;
             align-items: center;
@@ -270,12 +290,12 @@
             display: grid;
             grid-template-columns: repeat(3, minmax(270px, 1fr));
             gap: 20px;
-            align-items: stretch;
+            align-items: start;
         }
         .life-card {
             min-width: 0;
-            min-height: 590px;
-            padding: 24px;
+            min-height: 0;
+            padding: 22px 24px;
             border-radius: 16px;
             display: flex;
             flex-direction: column;
@@ -293,9 +313,6 @@
         .sport-option.active { background: var(--primary-color); color: #fff; border-color: var(--primary-color); }
         .mono-display { color: var(--primary-color); font: 800 34px/1.2 "SFMono-Regular", Consolas, monospace; text-align: center; }
         .button-row { display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; }
-        .manual-entry { margin-top: auto; padding-top: 20px; border-top: 1px solid var(--border-color); text-align: center; }
-        .number-input { width: 160px; padding: 10px; border: 1px solid #d7e3ea; border-radius: 8px; outline: none; }
-        .number-input:focus { border-color: var(--primary-color); }
 
         .timer-modes { display: flex; justify-content: center; gap: 8px; flex-wrap: wrap; }
         .timer-mode { padding: 8px 12px; }
@@ -330,14 +347,21 @@
         .health-row.done { background: #eaf8f0; border-color: #bfe7cf; }
         .health-check { width: 24px; height: 24px; display: grid; place-items: center; border: 2px solid #b9cbd8; border-radius: 50%; background: #fff; }
         .health-row.done .health-check { border-color: var(--success-color); background: var(--success-color); color: #fff; }
+        .health-card { position: relative; }
+        .health-edit-btn { position: absolute; top: 17px; right: 18px; padding: 4px 6px; border: 0; border-radius: 7px; background: transparent; cursor: pointer; font-size: 17px; opacity: 0; transition: .2s; }
+        .health-card:hover .health-edit-btn, .health-edit-btn:focus-visible, .health-card.editing .health-edit-btn { opacity: 1; }
+        .health-edit-btn:hover { background: var(--primary-soft); }
+        .health-selector { display: none; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; margin-bottom: 13px; padding: 12px; border: 1px dashed var(--primary-color); border-radius: 11px; background: #f8fcff; }
+        .health-card.editing .health-selector { display: grid; }
+        .health-selector-option { min-width: 0; display: flex; align-items: center; gap: 7px; padding: 8px; border-radius: 8px; color: var(--text-color); cursor: pointer; font-size: 12px; }
+        .health-selector-option:hover { background: var(--primary-soft); }
+        .health-selector-option input { accent-color: var(--primary-color); }
         .mood-box { margin-top: 14px; padding: 16px 15px 18px; border: 1px solid var(--border-color); border-radius: 11px; background: var(--primary-soft); }
         .mood-heading { display: flex; align-items: center; justify-content: space-between; margin-bottom: 15px; }
         .mood-score { color: var(--primary-color); font-weight: 800; }
         .mood-slider { width: 100%; accent-color: var(--primary-color); cursor: grab; }
         .mood-slider:active { cursor: grabbing; }
         .mood-ends { display: flex; justify-content: space-between; margin-top: 6px; color: var(--muted-color); font-size: 12px; }
-        .health-tip { margin-top: auto; padding-top: 18px; color: var(--muted-color); font-size: 12px; line-height: 1.6; text-align: center; }
-
         .stats-toolbar {
             display: flex;
             align-items: center;
@@ -345,7 +369,88 @@
             gap: 12px;
             flex-wrap: wrap;
         }
-        .month-picker { padding: 8px 10px; border: 1px solid var(--border-color); border-radius: 9px; color: var(--text-color); background: #fff; }
+        .stats-layout, .home-dashboard-layout { display: grid; grid-template-columns: 300px minmax(0, 1fr); gap: 20px; align-items: start; }
+        .home-main-column { min-width: 0; }
+        .stats-side { display: grid; gap: 18px; }
+        .stats-side-card {
+            margin: 0;
+            padding: 19px;
+            border-radius: 16px;
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            box-shadow: var(--shadow);
+        }
+        .stats-side-title { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 15px; font-size: 16px; font-weight: 850; }
+        .stats-main-card { min-width: 0; margin: 0; }
+        .task-stat-content { display: grid; grid-template-columns: 116px 1fr; align-items: center; gap: 16px; }
+        .task-progress-ring {
+            --task-progress: 0deg;
+            width: 116px;
+            height: 116px;
+            position: relative;
+            display: grid;
+            place-items: center;
+            border-radius: 50%;
+            background: conic-gradient(var(--primary-color) var(--task-progress), #e7f0f6 0);
+            box-shadow: inset 0 0 0 1px rgba(52, 152, 219, .06);
+        }
+        .task-progress-ring::before { content: ""; position: absolute; inset: 13px; border-radius: 50%; background: #fff; box-shadow: 0 2px 9px rgba(52, 152, 219, .08); }
+        .task-progress-value { position: relative; color: var(--primary-dark); font-size: 25px; font-weight: 900; }
+        .task-progress-label { position: relative; margin-top: -5px; color: var(--muted-color); font-size: 10px; }
+        .task-ring-center { position: relative; display: grid; place-items: center; }
+        .task-stat-copy { min-width: 0; }
+        .task-stat-summary { margin-bottom: 12px; font-size: 14px; font-weight: 800; line-height: 1.5; }
+        .task-stat-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-top: 7px; color: var(--muted-color); font-size: 12px; }
+        .task-stat-number { color: var(--text-color); font-weight: 850; }
+        .task-stat-dot { width: 8px; height: 8px; display: inline-block; margin-right: 6px; border-radius: 50%; background: var(--primary-color); }
+        .task-stat-dot.pending { background: #d9e5ed; }
+
+        .checkin-summary { color: var(--muted-color); font-size: 11px; font-weight: 650; }
+        .checkin-calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; text-align: center; }
+        .checkin-weekday { padding: 2px 0 5px; color: #9aaab5; font-size: 10px; }
+        .checkin-mini-day { min-width: 0; height: 39px; position: relative; display: grid; grid-template-rows: 12px 22px; place-items: center; padding: 2px 0; border-radius: 8px; color: #607483; font-size: 11px; }
+        .checkin-mini-day .mini-day-number { width: 23px; height: 23px; display: grid; place-items: center; border-radius: 50%; }
+        .checkin-mini-day.today { background: var(--primary-soft); color: var(--primary-dark); font-weight: 900; box-shadow: inset 0 0 0 1px rgba(52, 152, 219, .22); }
+        .checkin-mini-day.has-sport .mini-day-number { border: 2px solid #21a864; background: #e9f9f0; color: #157a48; font-weight: 900; box-shadow: 0 0 0 3px rgba(33, 168, 100, .14); }
+        .checkin-mini-day.future { opacity: .58; }
+        .checkin-stars { height: 12px; color: #f6b73c; font-size: 7px; line-height: 12px; letter-spacing: -1px; white-space: nowrap; text-shadow: 0 1px 2px rgba(246, 183, 60, .24); }
+        .checkin-mini-day.perfect .checkin-stars { color: #f39c12; font-size: 8px; }
+        .checkin-month-label { color: var(--primary-dark); font-size: 12px; font-weight: 800; }
+        .mini-month-picker { width: 124px; padding: 5px 7px; border: 1px solid var(--border-color); border-radius: 8px; background: #fff; color: var(--primary-dark); font-size: 11px; font-weight: 750; }
+
+        .weather-card { overflow: hidden; background: linear-gradient(180deg, #fff 0%, #fbfdff 100%); }
+        .weather-refresh { width: 27px; height: 27px; padding: 0; border: 1px solid var(--border-color); border-radius: 8px; background: #fff; color: var(--primary-color); cursor: pointer; }
+        .weather-refresh:hover { background: var(--primary-soft); }
+        .weather-refresh:disabled { color: #aebbc4; cursor: wait; }
+        .weather-meta { display: flex; align-items: center; justify-content: space-between; gap: 8px; color: var(--muted-color); font-size: 11px; }
+        .weather-location { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--text-color); font-size: 13px; font-weight: 800; }
+        .weather-current { display: grid; grid-template-columns: auto 1fr; align-items: center; gap: 14px; padding: 12px 0 14px; border-bottom: 1px solid #e8edf1; }
+        .weather-temperature { color: #0b477a; font-size: 52px; font-weight: 500; line-height: 1; letter-spacing: -3px; }
+        .weather-temperature sup { position: relative; top: -18px; margin-left: 4px; font-size: 17px; font-weight: 500; letter-spacing: 0; }
+        .weather-condition { margin-bottom: 7px; font-size: 14px; font-weight: 850; }
+        .weather-details { color: #536978; font-size: 11px; line-height: 1.65; }
+        .weather-forecast { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 1px; padding-top: 12px; }
+        .weather-day { min-width: 0; text-align: center; color: #526a7a; font-size: 10px; }
+        .weather-day-name { height: 18px; font-weight: 750; }
+        .weather-day-icon { height: 30px; font-size: 23px; line-height: 30px; }
+        .weather-day-temp { font-size: 10px; line-height: 1.55; }
+        .weather-day-temp .high { color: #dc7a2a; }
+        .weather-day-temp .low { color: #438ac4; }
+        .weather-trend { width: 100%; height: 44px; display: block; margin: 1px 0 0; overflow: visible; }
+        .weather-source { margin-top: 8px; color: #a7b4bd; font-size: 9px; text-align: right; }
+        .weather-loading { min-height: 236px; display: grid; place-items: center; color: var(--muted-color); font-size: 12px; text-align: center; line-height: 1.7; }
+        .weather-error-action { margin-top: 9px; padding: 6px 10px; border: 1px solid var(--border-color); border-radius: 8px; background: #fff; color: var(--primary-dark); cursor: pointer; font-size: 11px; }
+        .perpetual-calendar-card { background: linear-gradient(155deg, #fffdf8 0%, #ffffff 58%, #f7fbff 100%); }
+        .perpetual-date { display: grid; grid-template-columns: 62px 1fr; align-items: center; gap: 13px; margin-bottom: 12px; padding-bottom: 12px; border-bottom: 1px solid #edf1f4; }
+        .perpetual-day { width: 62px; height: 62px; display: grid; place-items: center; border-radius: 16px; background: linear-gradient(145deg, #3498db, #247bb6); color: #fff; font-size: 31px; font-weight: 900; box-shadow: 0 8px 18px rgba(52,152,219,.2); }
+        .perpetual-solar { color: #536a7a; font-size: 11px; line-height: 1.55; }
+        .perpetual-lunar { display: block; margin-top: 3px; color: #263f52; font-size: 14px; font-weight: 850; }
+        .perpetual-tags { display: flex; flex-wrap: wrap; gap: 6px; min-height: 25px; margin-bottom: 11px; }
+        .perpetual-tag { padding: 4px 8px; border-radius: 999px; background: #fff1dc; color: #a8611c; font-size: 10px; font-weight: 800; }
+        .perpetual-tag.upcoming { background: var(--primary-soft); color: var(--primary-dark); }
+        .perpetual-calendar-card .almanac-box { padding-top: 11px; border-top: 1px dashed var(--border-color); }
+        .month-picker { width: 122px; height: 34px; padding: 6px 8px; border: 1px solid var(--border-color); border-radius: 9px; color: var(--text-color); background: #fff; font-size: 11px; }
+        .stats-month-nav { width: 34px; height: 34px; padding: 0; display: grid; place-items: center; font-size: 11px; }
         .stats-scroll { overflow-x: auto; padding-bottom: 6px; }
         .stats-calendar { min-width: 1180px; display: grid; grid-template-columns: repeat(7, minmax(160px, 1fr)); align-items: start; gap: 10px; }
         .stats-weekday { padding: 12px 9px; color: var(--text-color); font-size: 15px; font-weight: 850; text-align: center; }
@@ -357,16 +462,20 @@
             box-shadow: 0 3px 11px rgba(52, 152, 219, .045);
             display: flex;
             flex-direction: column;
+            color: #314a5c;
         }
         .stats-day.blank { height: 90px; background: rgba(255,255,255,.35); border-style: dashed; box-shadow: none; }
-        .stats-day.future { opacity: .55; }
+        .stats-day.future { opacity: .88; }
         .stats-day.editing { border-color: var(--primary-color); box-shadow: 0 0 0 2px rgba(52,152,219,.12); }
         .stats-date { display: flex; align-items: center; justify-content: space-between; min-height: 34px; margin-bottom: 10px; font-size: 19px; font-weight: 900; }
         .stats-date.today > span:first-child { width: 34px; height: 34px; display: grid; place-items: center; border-radius: 50%; background: var(--primary-color); color: #fff; }
         .day-edit-btn { padding: 4px 5px; border: 0; border-radius: 6px; background: transparent; cursor: pointer; font-size: 17px; opacity: 0; }
         .day-edit-btn:hover, .day-edit-btn:focus-visible, .stats-day.editing .day-edit-btn { background: var(--primary-soft); opacity: 1; }
         .stats-section-title { margin: 9px 0 5px; color: #768997; font-size: 12px; font-weight: 800; }
-        .mood-chip { position: relative; margin-bottom: 7px; padding: 7px 28px 7px 9px; border-radius: 8px; background: #fff7e6; color: #8b6a2b; font-size: 12px; line-height: 1.4; }
+        .mood-chip, .focus-chip { position: relative; margin-bottom: 7px; padding: 7px 9px; border-radius: 8px; font-size: 12px; line-height: 1.4; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .stats-day.editing .mood-chip, .stats-day.editing .focus-chip { padding-right: 28px; }
+        .mood-chip { background: #fff7e6; color: #76531e; }
+        .focus-chip { background: var(--primary-soft); color: #285f88; }
         .record-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
         .record-block { position: relative; padding: 8px 26px 8px 8px; border-radius: 8px; font-size: 11px; line-height: 1.4; }
         .record-block.sport { background: #eef8f1; color: #417453; }
@@ -375,7 +484,7 @@
         .record-block-value { overflow-wrap: anywhere; }
         .record-delete { position: absolute; top: 5px; right: 6px; width: 19px; height: 19px; padding: 0; border: 0; border-radius: 50%; background: rgba(255,255,255,.82); color: var(--danger-color); cursor: pointer; font-weight: 900; line-height: 19px; }
         .day-todos { margin: 5px 0 0; padding: 0; list-style: none; font-size: 12px; }
-        .day-todos li { display: flex; gap: 5px; margin-bottom: 5px; padding: 5px 7px; border-radius: 7px; background: #f7f9fb; color: #5e6f7b; line-height: 1.4; overflow-wrap: anywhere; }
+        .day-todos li { display: flex; gap: 5px; margin-bottom: 5px; padding: 5px 7px; border-radius: 7px; background: #f7f9fb; color: #405867; line-height: 1.4; overflow-wrap: anywhere; }
         .day-completions { min-height: 56px; }
         .editable-completion { flex: 1; min-width: 0; outline: none; border-bottom: 1px dashed var(--primary-color); }
         .completion-delete { flex: 0 0 18px; width: 18px; height: 18px; padding: 0; border: 0; border-radius: 50%; background: #fdecec; color: var(--danger-color); cursor: pointer; font-size: 12px; font-weight: 900; line-height: 18px; }
@@ -383,7 +492,7 @@
         .day-completion-add input { min-width: 0; flex: 1; padding: 5px 7px; border: 1px dashed #b9d7e9; border-radius: 7px; outline: none; color: var(--text-color); font-size: 11px; }
         .day-completion-add input:focus { border-color: var(--primary-color); }
         .day-completion-add button { flex: 0 0 27px; padding: 0; border: 0; border-radius: 7px; background: var(--primary-color); color: #fff; cursor: pointer; font-weight: 900; }
-        .no-record { color: #adb8bf; font-size: 11px; }
+        .no-record { color: #788b98; font-size: 11px; }
 
         .toast {
             position: fixed;
@@ -433,11 +542,14 @@
         .cloud-conflict-title { color: #9b493b; font-weight: 850; }
         .cloud-conflict-copy { margin-top: 5px; color: #93695f; font-size: 12px; line-height: 1.55; }
         .cloud-password-note { margin-top: -8px; color: var(--muted-color); font-size: 11px; line-height: 1.45; }
+        .cloud-text-action { padding: 8px 0 0; border: 0; background: transparent; color: var(--primary-dark); cursor: pointer; font-size: 12px; font-weight: 750; }
 
         @media (max-width: 1180px) {
             .header-info { grid-template-columns: 1fr; }
             .life-grid { grid-template-columns: repeat(2, minmax(280px, 1fr)); }
             .life-card:last-child { grid-column: 1 / -1; }
+            .stats-layout, .home-dashboard-layout { grid-template-columns: 1fr; }
+            .stats-side { grid-template-columns: repeat(3, minmax(0, 1fr)); }
         }
         @media (max-width: 900px) {
             body { display: block; }
@@ -450,6 +562,7 @@
             .main-content { padding: 20px; }
             .header-info { grid-template-columns: 1fr; }
             .plan-grid { grid-template-columns: 1fr; }
+            .stats-side { grid-template-columns: 1fr; }
         }
         @media (max-width: 680px) {
             .countdown-grid { flex-direction: column; }
@@ -467,14 +580,24 @@
             <span id="app-name">小帅博士</span><br>
             <span class="logo-subtitle">自律打卡系统</span>
         </div>
-        <div class="nav-item active" onclick="showPage('home', this)">🏠 首页概览</div>
+        <div class="nav-item active" onclick="showPage('home', this)">💪 自律打卡</div>
         <div class="nav-item" onclick="showPage('life', this)">🏋️ 生活记录</div>
         <div class="nav-item" onclick="showPage('stats', this)">📊 数据统计</div>
         <div class="sidebar-tools">
-            <button type="button" class="sidebar-tool-btn cloud-sync-btn" id="cloud-sync-button" data-state="offline" onclick="openCloudSyncModal()">☁️ 云同步：未登录</button>
+            <div class="theme-picker" aria-label="主题颜色">
+                <div class="theme-picker-title">🎨 主题颜色</div>
+                <div class="theme-swatches">
+                    <button type="button" class="theme-swatch" data-theme="blue" onclick="setTheme('blue')" title="晴空蓝" aria-label="晴空蓝"></button>
+                    <button type="button" class="theme-swatch" data-theme="mint" onclick="setTheme('mint')" title="薄荷绿" aria-label="薄荷绿"></button>
+                    <button type="button" class="theme-swatch" data-theme="violet" onclick="setTheme('violet')" title="鸢尾紫" aria-label="鸢尾紫"></button>
+                    <button type="button" class="theme-swatch" data-theme="peach" onclick="setTheme('peach')" title="暖杏橙" aria-label="暖杏橙"></button>
+                    <button type="button" class="theme-swatch" data-theme="rose" onclick="setTheme('rose')" title="蔷薇粉" aria-label="蔷薇粉"></button>
+                </div>
+            </div>
             <button type="button" class="sidebar-tool-btn" onclick="exportAllData()">⬇️ 导出数据</button>
             <button type="button" class="sidebar-tool-btn" onclick="document.getElementById('data-import-file').click()">⬆️ 导入数据</button>
             <input type="file" class="hidden-file-input" id="data-import-file" accept=".json,application/json" onchange="importAllData(this.files[0]); this.value=''">
+            <button type="button" class="sidebar-tool-btn cloud-sync-btn" id="cloud-sync-button" data-state="offline" onclick="openCloudSyncModal()">☁️ 云同步：未登录</button>
         </div>
     </aside>
 
@@ -483,17 +606,17 @@
             <div class="time-card">
                 <div class="current-time" id="current-time">00:00</div>
                 <div class="current-date" id="current-date">2026年9月2日 星期三</div>
-                <div class="almanac-box" title="今日宜忌仅供生活参考">
-                    <div class="almanac-row yi"><span class="almanac-badge">宜</span><span class="almanac-text" id="almanac-yi">规划今日、整理环境、保持专注</span></div>
-                    <div class="almanac-row ji"><span class="almanac-badge">忌</span><span class="almanac-text" id="almanac-ji">拖延冲动、熬夜透支、仓促决定</span></div>
-                    <div class="almanac-source" id="almanac-source">正在更新万年历</div>
-                </div>
             </div>
             <div class="countdown-grid" id="countdown-grid">
                 <div class="custom-countdown-cards" id="custom-countdown-cards"></div>
-                <div class="countdown-card">
-                    <div class="cd-label">距离周一</div>
+                <div class="countdown-card weekday-countdown-card" id="weekday-countdown-card">
+                    <button type="button" class="weekday-edit-btn" onclick="toggleWeekdayCountdownEditor(event)" title="选择倒计时星期" aria-label="选择倒计时星期">🖊</button>
+                    <div class="cd-label" id="weekday-countdown-label">距离周一</div>
                     <div class="cd-val" id="cd-weekday">0天</div>
+                    <select class="weekday-picker" id="weekday-countdown-picker" onchange="setCountdownWeekday(this.value)">
+                        <option value="1">星期一</option><option value="2">星期二</option><option value="3">星期三</option><option value="4">星期四</option>
+                        <option value="5">星期五</option><option value="6">星期六</option><option value="0">星期日</option>
+                    </select>
                 </div>
                 <div class="countdown-card">
                     <div class="cd-label" id="holiday-label">距离下一个法定节假日</div>
@@ -508,25 +631,65 @@
         </section>
 
         <section id="page-home" class="page">
+            <div class="home-dashboard-layout">
+                <aside class="stats-side home-summary-side" aria-label="自律打卡摘要">
+                    <section class="stats-side-card">
+                        <div class="stats-side-title"><span>📊 任务统计</span><span class="checkin-summary">近期待办</span></div>
+                        <div class="task-stat-content">
+                            <div class="task-progress-ring" id="home-task-progress-ring" role="img" aria-label="近期待办完成率 0%">
+                                <div class="task-ring-center">
+                                    <div class="task-progress-value" id="home-task-progress-value">0%</div>
+                                    <div class="task-progress-label">完成率</div>
+                                </div>
+                            </div>
+                            <div class="task-stat-copy">
+                                <div class="task-stat-summary" id="home-task-stat-summary">还没有近期待办</div>
+                                <div class="task-stat-row"><span><span class="task-stat-dot"></span>已完成</span><span class="task-stat-number" id="home-task-stat-done">0</span></div>
+                                <div class="task-stat-row"><span><span class="task-stat-dot pending"></span>待完成</span><span class="task-stat-number" id="home-task-stat-pending">0</span></div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section class="stats-side-card weather-card">
+                        <div class="stats-side-title"><span>🌤️ 我的天气</span><button type="button" class="weather-refresh" data-weather-refresh onclick="loadLocalWeather(true)" title="刷新天气" aria-label="刷新天气">↻</button></div>
+                        <div class="weather-loading" data-weather-content>正在根据 IP 获取当地天气…</div>
+                    </section>
+
+                    <section class="stats-side-card perpetual-calendar-card">
+                        <div class="stats-side-title"><span>📆 万年日历</span><span class="checkin-summary" data-almanac-weekday>星期三</span></div>
+                        <div class="perpetual-date">
+                            <div class="perpetual-day" data-almanac-day>2</div>
+                            <div class="perpetual-solar"><span data-almanac-solar>2026年9月2日</span><strong class="perpetual-lunar" data-almanac-lunar>农历七月廿一</strong></div>
+                        </div>
+                        <div class="perpetual-tags" data-almanac-tags></div>
+                        <div class="almanac-box" title="今日宜忌仅供生活参考">
+                            <div class="almanac-row yi"><span class="almanac-badge">宜</span><span class="almanac-text" data-almanac-yi>规划今日、整理环境、保持专注</span></div>
+                            <div class="almanac-row ji"><span class="almanac-badge">忌</span><span class="almanac-text" data-almanac-ji>拖延冲动、熬夜透支、仓促决定</span></div>
+                            <div class="almanac-source" data-almanac-source>正在更新万年历</div>
+                        </div>
+                    </section>
+                </aside>
+
+                <div class="home-main-column">
             <div class="card">
                 <div class="card-title">📅 今日打卡</div>
                 <div class="checkin-container">
                     <div class="checkin-item">
                         <div class="checkin-icon" id="icon-am">⭕</div>
                         <div class="checkin-name">上午</div>
-                        <div class="checkin-deadline">10:00前</div>
+                        <div class="checkin-deadline">06:00–10:00</div>
                         <button class="primary-btn" id="btn-am" onclick="doCheckIn('am')">打卡</button>
                     </div>
                     <div class="checkin-item">
                         <div class="checkin-icon" id="icon-pm">⭕</div>
-                        <div class="checkin-name">下午</div>
-                        <div class="checkin-deadline">15:00前</div>
+                        <div class="checkin-name">中午</div>
+                        <div class="checkin-deadline">12:00–15:00</div>
                         <button class="primary-btn" id="btn-pm" onclick="doCheckIn('pm')">打卡</button>
                     </div>
                     <div class="checkin-item">
                         <div class="checkin-icon" id="icon-night">⭕</div>
                         <div class="checkin-name">晚上</div>
-                        <div class="checkin-deadline">20:00前</div>
+                        <div class="checkin-deadline">18:00–20:00</div>
                         <button class="primary-btn" id="btn-night" onclick="doCheckIn('night')">打卡</button>
                     </div>
                 </div>
@@ -547,7 +710,7 @@
                     </div>
 
                     <div class="goal-panel">
-                        <div class="section-label"><span>📌 近期待办</span><span id="goal-count">0 / 0 完成</span></div>
+                        <div class="section-label"><span id="goal-panel-title">📌 近期待办</span><span class="goal-label-actions"><button type="button" class="goal-back-btn hidden" id="goal-back-btn" onclick="showUpcomingGoals()">返回待办</button><span id="goal-count">0 项待完成</span></span></div>
                         <div class="todo-input-group">
                             <input class="todo-input" id="new-goal-input" placeholder="添加新任务，按回车确认" onkeydown="handleGoalInput(event)">
                             <button class="primary-btn" onclick="addRecentGoal()">添加</button>
@@ -565,6 +728,8 @@
                     <ul class="todo-list" id="todo-list"></ul>
                 </div>
             </div>
+                </div>
+            </div>
         </section>
 
         <section id="page-life" class="page hidden">
@@ -572,11 +737,13 @@
                 <div class="card-title">📊 今日状态</div>
                 <div class="status-grid">
                     <div class="status-panel">
+                        <button type="button" class="status-edit-btn" onclick="editTodayStatus('sport')" title="编辑今日运动" aria-label="编辑今日运动">🖊</button>
                         <div class="status-label">今日运动</div>
                         <div><span class="status-value" id="life-sport-hr">0.0</span><span class="status-unit">小时</span></div>
                         <div class="status-detail" id="life-sport-min">0 分钟</div>
                     </div>
                     <div class="status-panel">
+                        <button type="button" class="status-edit-btn" onclick="editTodayStatus('focus')" title="编辑今日专注" aria-label="编辑今日专注">🖊</button>
                         <div class="status-label">今日专注</div>
                         <div><span class="status-value" id="life-focus-hr">0.0</span><span class="status-unit">小时</span></div>
                         <div class="status-detail" id="life-focus-min">0 分钟</div>
@@ -603,10 +770,6 @@
                         <button class="primary-btn" onclick="startStopwatch()">开始计时</button>
                         <button class="primary-btn danger-btn" onclick="stopStopwatch()">停止并记录</button>
                     </div>
-                    <div class="manual-entry">
-                        <input type="number" min="1" id="manual-sport-min" class="number-input" placeholder="手动输入（分钟）">
-                        <button class="primary-btn" onclick="addManualSport()">添加记录</button>
-                    </div>
                 </div>
 
                 <div class="life-card">
@@ -624,34 +787,77 @@
                     <div class="timer-note">完成一个番茄周期后，专注时长会自动记入当天。</div>
                 </div>
 
-                <div class="life-card">
+                <div class="life-card health-card" id="health-card">
+                    <button type="button" class="health-edit-btn" onclick="toggleHealthHabitEditor(event)" title="选择健康生活项目" aria-label="选择健康生活项目">🖊</button>
                     <div class="card-title">🌿 健康生活</div>
-                    <div class="health-list">
-                        <button class="health-row" id="health-sleep" onclick="toggleHealth('sleep')"><span>😴 充足睡眠</span><span class="health-check"></span></button>
-                        <button class="health-row" id="health-meal" onclick="toggleHealth('meal')"><span>🍚 好好吃饭</span><span class="health-check"></span></button>
-                        <button class="health-row" id="health-medicine" onclick="toggleHealth('medicine')"><span>💊 按时吃药</span><span class="health-check"></span></button>
-                    </div>
+                    <div class="health-selector" id="health-selector"></div>
+                    <div class="health-list" id="health-list"></div>
                     <div class="mood-box">
                         <div class="mood-heading"><span>💗 今日心情</span><span class="mood-score" id="mood-score">😐 50分</span></div>
                         <input type="range" min="0" max="100" value="50" class="mood-slider" id="mood-slider" oninput="previewMood(this.value)" onchange="saveMood(this.value)">
                         <div class="mood-ends"><span>😞 沮丧</span><span>😊 开心</span></div>
                     </div>
-                    <div class="health-tip">这些记录按天保存，可在“数据统计”中按月份回看。</div>
                 </div>
             </div>
         </section>
 
         <section id="page-stats" class="page hidden">
-            <div class="card">
-                <div class="card-title stats-toolbar">
-                    <span>🗓️ 当月日历</span>
-                    <div class="button-row">
-                        <button class="primary-btn ghost-btn" onclick="changeStatsMonth(-1)">◀ 上月</button>
-                        <input type="month" class="month-picker" id="stats-month-picker" onchange="pickStatsMonth(this.value)">
-                        <button class="primary-btn ghost-btn" onclick="changeStatsMonth(1)">下月 ▶</button>
+            <div class="stats-layout">
+                <aside class="stats-side" aria-label="统计摘要">
+                    <section class="stats-side-card">
+                        <div class="stats-side-title"><span>📊 任务统计</span><span class="checkin-summary" id="task-stat-caption">近期待办</span></div>
+                        <div class="task-stat-content">
+                            <div class="task-progress-ring" id="task-progress-ring" role="img" aria-label="近期待办完成率 0%">
+                                <div class="task-ring-center">
+                                    <div class="task-progress-value" id="task-progress-value">0%</div>
+                                    <div class="task-progress-label">完成率</div>
+                                </div>
+                            </div>
+                            <div class="task-stat-copy">
+                                <div class="task-stat-summary" id="task-stat-summary">还没有近期待办</div>
+                                <div class="task-stat-row"><span><span class="task-stat-dot"></span>已完成</span><span class="task-stat-number" id="task-stat-done">0</span></div>
+                                <div class="task-stat-row"><span><span class="task-stat-dot pending"></span>待完成</span><span class="task-stat-number" id="task-stat-pending">0</span></div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section class="stats-side-card">
+                        <div class="stats-side-title"><span>⭐ 打卡记录</span><input type="month" class="mini-month-picker" id="checkin-month-picker" onchange="pickCheckinMonth(this.value)" aria-label="选择打卡记录年月"></div>
+                        <div class="checkin-calendar-grid" id="checkin-calendar-grid"></div>
+                        <div class="weather-source" id="checkin-month-summary">本月累计 0 次打卡</div>
+                    </section>
+
+                    <section class="stats-side-card weather-card">
+                        <div class="stats-side-title"><span>🌤️ 我的天气</span><button type="button" class="weather-refresh" data-weather-refresh onclick="loadLocalWeather(true)" title="刷新天气" aria-label="刷新天气">↻</button></div>
+                        <div class="weather-loading" data-weather-content>正在根据 IP 获取当地天气…</div>
+                    </section>
+
+                    <section class="stats-side-card perpetual-calendar-card">
+                        <div class="stats-side-title"><span>📆 万年日历</span><span class="checkin-summary" data-almanac-weekday>星期三</span></div>
+                        <div class="perpetual-date">
+                            <div class="perpetual-day" data-almanac-day>2</div>
+                            <div class="perpetual-solar"><span data-almanac-solar>2026年9月2日</span><strong class="perpetual-lunar" data-almanac-lunar>农历七月廿一</strong></div>
+                        </div>
+                        <div class="perpetual-tags" data-almanac-tags></div>
+                        <div class="almanac-box" title="今日宜忌仅供生活参考">
+                            <div class="almanac-row yi"><span class="almanac-badge">宜</span><span class="almanac-text" data-almanac-yi>规划今日、整理环境、保持专注</span></div>
+                            <div class="almanac-row ji"><span class="almanac-badge">忌</span><span class="almanac-text" data-almanac-ji>拖延冲动、熬夜透支、仓促决定</span></div>
+                            <div class="almanac-source" data-almanac-source>正在更新万年历</div>
+                        </div>
+                    </section>
+                </aside>
+
+                <div class="card stats-main-card">
+                    <div class="card-title stats-toolbar">
+                        <span>🗓️ 当月日历</span>
+                        <div class="button-row">
+                            <button class="primary-btn ghost-btn stats-month-nav" onclick="changeStatsMonth(-1)" title="上个月" aria-label="上个月">◀</button>
+                            <input type="month" class="month-picker" id="stats-month-picker" onchange="pickStatsMonth(this.value)">
+                            <button class="primary-btn ghost-btn stats-month-nav" onclick="changeStatsMonth(1)" title="下个月" aria-label="下个月">▶</button>
+                        </div>
                     </div>
+                    <div class="stats-scroll"><div class="stats-calendar" id="stats-calendar"></div></div>
                 </div>
-                <div class="stats-scroll"><div class="stats-calendar" id="stats-calendar"></div></div>
             </div>
         </section>
     </main>
@@ -678,22 +884,22 @@
     <div class="modal-overlay" id="cloud-sync-modal" onclick="if(event.target===this) closeCloudSyncModal()">
         <div class="modal-content">
             <div class="modal-title">☁️ 私人云同步</div>
-            <div class="cloud-sync-intro">最多支持50个独立账号。首次在主设备注册会把本机记录上传；其他设备登录同一账号会自动恢复云端记录。</div>
+            <div class="cloud-sync-intro">登录同一账号后会自动同步云端记录</div>
 
             <div id="cloud-auth-panel">
                 <div class="form-row">
-                    <label for="cloud-username">同步名称</label>
+                    <label for="cloud-username">同步账号</label>
                     <input class="form-input" id="cloud-username" maxlength="30" autocomplete="username" placeholder="例如：xiaoshuai">
                 </div>
                 <div class="form-row">
-                    <label for="cloud-password">私人同步密码</label>
-                    <input type="password" class="form-input" id="cloud-password" maxlength="128" autocomplete="current-password" placeholder="至少10位，请妥善保存">
+                    <label for="cloud-password">同步密码</label>
+                    <input type="password" class="form-input" id="cloud-password" maxlength="128" autocomplete="current-password" placeholder="至少6位">
                 </div>
-                <div class="cloud-password-note">服务器不会保存密码原文；忘记密码后无法读取原账号的数据。</div>
                 <div class="form-row" style="margin-top:16px;">
-                    <label for="cloud-invite-code">管理员邀请码（仅首次注册需要）</label>
+                    <label for="cloud-invite-code">邀请码（仅首次注册需要）</label>
                     <input type="password" class="form-input" id="cloud-invite-code" maxlength="128" autocomplete="off" placeholder="登录已有账号时留空">
                 </div>
+                <button type="button" class="cloud-text-action" onclick="openCloudPasswordReset()">忘记密码？</button>
                 <div class="modal-actions">
                     <button class="primary-btn ghost-btn" onclick="closeCloudSyncModal()">取消</button>
                     <button class="primary-btn ghost-btn" id="cloud-register-btn" onclick="registerCloudUser()">首次注册</button>
@@ -701,10 +907,30 @@
                 </div>
             </div>
 
+            <div id="cloud-reset-panel" class="cloud-hidden">
+                <div class="form-row">
+                    <label for="cloud-reset-username">同步账号</label>
+                    <input class="form-input" id="cloud-reset-username" maxlength="30" autocomplete="username">
+                </div>
+                <div class="form-row">
+                    <label for="cloud-recovery-input">恢复码</label>
+                    <input class="form-input" id="cloud-recovery-input" maxlength="128" autocomplete="off" placeholder="输入恢复码">
+                </div>
+                <div class="form-row">
+                    <label for="cloud-new-password">新密码</label>
+                    <input type="password" class="form-input" id="cloud-new-password" maxlength="128" autocomplete="new-password" placeholder="至少6位">
+                </div>
+                <div class="cloud-password-note">重设成功后旧密码及其他设备上的登录状态都会失效。</div>
+                <div class="modal-actions">
+                    <button class="primary-btn ghost-btn" onclick="backToCloudLogin()">返回登录</button>
+                    <button class="primary-btn" id="cloud-reset-btn" onclick="resetCloudPassword()">重设密码</button>
+                </div>
+            </div>
+
             <div id="cloud-account-panel" class="cloud-hidden">
                 <div class="cloud-account">
                     <div class="cloud-account-name" id="cloud-account-name">已登录</div>
-                    <div class="cloud-account-note">本机修改会自动上传；回到本页面或重新获得焦点时会检查其他设备的新记录。</div>
+                    <div class="cloud-account-note">本机修改会自动上传；回到本页面时会检查其他设备的新记录。</div>
                 </div>
                 <div class="cloud-button-grid">
                     <button class="primary-btn" onclick="syncCloudNow()">立即同步</button>
@@ -749,11 +975,39 @@
             { yi: '制定计划、耐心执行、收纳整理、亲近自然', ji: '畏难搁置、情绪用事、饮食无度' },
             { yi: '完成重点、适量锻炼、真诚交流、保持从容', ji: '贪多求快、反复拖延、勉强自己' }
         ];
+        const SOLAR_TERM_NAMES = ['小寒','大寒','立春','雨水','惊蛰','春分','清明','谷雨','立夏','小满','芒种','夏至','小暑','大暑','立秋','处暑','白露','秋分','寒露','霜降','立冬','小雪','大雪','冬至'];
+        const SOLAR_TERM_MINUTES = [0,21208,42467,63836,85337,107014,128867,150921,173149,195551,218072,240693,263343,285989,308563,331033,353350,375494,397447,419210,440795,462224,483532,504758];
+        const LUNAR_FESTIVALS = {
+            '1-1': '春节', '1-15': '元宵节', '2-2': '龙抬头', '5-5': '端午节',
+            '7-7': '七夕节', '7-15': '中元节', '8-15': '中秋节', '9-9': '重阳节',
+            '12-8': '腊八节', '12-23': '小年'
+        };
+        const SOLAR_FESTIVALS = { '01-01': '元旦', '05-01': '劳动节', '10-01': '国庆节' };
+        const THEMES = {
+            blue:   { primary: '#3498db', dark: '#2477b3', soft: '#e3f1fb', bg: '#eaf5fc', border: '#bddced', shadow: 'rgba(52,152,219,.12)' },
+            mint:   { primary: '#2fa989', dark: '#207b65', soft: '#e2f5ef', bg: '#eaf8f4', border: '#b9dfd4', shadow: 'rgba(47,169,137,.12)' },
+            violet: { primary: '#8067c9', dark: '#6049a7', soft: '#ebe7f8', bg: '#f1eef9', border: '#d2c9eb', shadow: 'rgba(128,103,201,.12)' },
+            peach:  { primary: '#e88955', dark: '#bd6438', soft: '#fcebe0', bg: '#fdf2eb', border: '#ebcfbe', shadow: 'rgba(232,137,85,.12)' },
+            rose:   { primary: '#d85d83', dark: '#ad3e63', soft: '#f8e5ec', bg: '#fcedf2', border: '#e8c4d2', shadow: 'rgba(216,93,131,.12)' }
+        };
         const SPORT_NAMES = {
             swimming: '游泳', badminton: '羽毛球', gym: '健身', cycling: '骑行', running: '跑步',
             basketball: '篮球', walking: '散步', volleyball: '排球', tennis: '网球', gaming: '游戏'
         };
-        const CHECKIN_WINDOWS = { am: [360, 600], pm: [720, 900], night: [1020, 1200] };
+        const HEALTH_HABITS = {
+            sleep: { emoji: '😴', label: '充足睡眠' },
+            meal: { emoji: '🍚', label: '好好吃饭' },
+            medicine: { emoji: '💊', label: '按时吃药' },
+            review: { emoji: '📝', label: '复盘总结' },
+            lookFar: { emoji: '👀', label: '放眼远眺' },
+            unwind: { emoji: '🧘', label: '停止内耗' },
+            move: { emoji: '🧍', label: '起身活动' }
+        };
+        const DEFAULT_HEALTH_HABITS = ['sleep', 'meal', 'medicine'];
+        const WEEKDAY_NAMES = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'];
+        const CHECKIN_WINDOWS = { am: [360, 600], pm: [720, 900], night: [1080, 1200] };
+        const WEATHER_CACHE_KEY = 'ddLocalWeatherCacheV1';
+        const RECORD_RESET_VERSION = 'cloud-v2-clean-records-2026-09-03-v1';
         const DATA_STORAGE_DEFAULTS = {
             ddHistoryData: {}, ddTodos: {}, ddRecentGoals: [], ddCheckins: {},
             ddHealthData: {}, ddAlmanacRecords: {}, ddAppSettings: {}
@@ -763,9 +1017,7 @@
         const CLOUD_REVISION_KEY = 'ddCloudRevision';
         const CLOUD_DIRTY_KEY = 'ddCloudDirty';
         const CLOUD_SAFETY_BACKUP_KEY = 'ddCloudSafetyBackup';
-        // 线上版不内嵌任何人的历史日志；每个账号仅从自己的云端或导入文件读取数据。
-        const IMPORTED_LOG_VERSION = '';
-        const IMPORTED_LOG_TODOS = {}; /* __IMPORTED_LOG_TODOS__ */
+
         let historyData = {};
         let todos = {};
         let recentGoals = [];
@@ -774,10 +1026,12 @@
         let almanacRecords = {};
         let currentCalendarDate = new Date();
         let statsCalendarDate = new Date();
+        let checkinCalendarDate = new Date();
+        let selectedTaskDate = null;
         let activeDateKey = '';
         let appReady = false;
         const defaultAppName = document.querySelector('meta[name="app-name"]').content || '小帅博士';
-        let appSettings = { name: defaultAppName, customCountdowns: [] };
+        let appSettings = { name: defaultAppName, customCountdowns: [], theme: 'blue', healthHabits: [...DEFAULT_HEALTH_HABITS], countdownWeekday: 1 };
 
         let checkinStatus = { am: false, pm: false, night: false };
         let stopwatchInterval = null;
@@ -791,6 +1045,8 @@
         let editingDateKey = '';
         let editingCustomCountdownIndex = null;
         let toastTimer = null;
+        let weatherLoaded = false;
+        let weatherLoading = false;
         let cloudSession = null;
         let cloudRevision = 0;
         let cloudDirty = false;
@@ -798,6 +1054,7 @@
         let cloudSyncing = false;
         let cloudApplying = false;
         let cloudConflictData = null;
+        let cloudResetMode = false;
         let lastCloudPullAt = 0;
 
         function safeJSON(value, fallback) {
@@ -885,7 +1142,8 @@
 
         function renderCloudPanel() {
             const loggedIn = Boolean(cloudSession?.token);
-            document.getElementById('cloud-auth-panel')?.classList.toggle('cloud-hidden', loggedIn);
+            document.getElementById('cloud-auth-panel')?.classList.toggle('cloud-hidden', loggedIn || cloudResetMode);
+            document.getElementById('cloud-reset-panel')?.classList.toggle('cloud-hidden', loggedIn || !cloudResetMode);
             document.getElementById('cloud-account-panel')?.classList.toggle('cloud-hidden', !loggedIn);
             document.getElementById('cloud-conflict-panel')?.classList.toggle('cloud-hidden', !cloudConflictData);
             const name = document.getElementById('cloud-account-name');
@@ -895,15 +1153,30 @@
         function openCloudSyncModal() {
             renderCloudPanel();
             document.getElementById('cloud-sync-modal').classList.add('show');
-            if (!cloudSession) setTimeout(() => document.getElementById('cloud-username')?.focus(), 0);
+            if (!cloudSession && !cloudResetMode) setTimeout(() => document.getElementById('cloud-username')?.focus(), 0);
         }
 
         function closeCloudSyncModal() {
             document.getElementById('cloud-sync-modal').classList.remove('show');
         }
 
+        function openCloudPasswordReset() {
+            cloudResetMode = true;
+            const resetName = document.getElementById('cloud-reset-username');
+            const loginName = document.getElementById('cloud-username');
+            if (resetName && loginName) resetName.value = loginName.value.trim();
+            renderCloudPanel();
+            setTimeout(() => resetName?.focus(), 0);
+        }
+
+        function backToCloudLogin() {
+            cloudResetMode = false;
+            renderCloudPanel();
+            setCloudStatus('offline', '尚未登录云同步');
+        }
+
         function setCloudAuthBusy(busy) {
-            ['cloud-register-btn', 'cloud-login-btn'].forEach(id => {
+            ['cloud-register-btn', 'cloud-login-btn', 'cloud-reset-btn'].forEach(id => {
                 const button = document.getElementById(id);
                 if (button) button.disabled = busy;
             });
@@ -951,6 +1224,7 @@
             cloudRevision = 0;
             cloudDirty = false;
             cloudConflictData = null;
+            cloudResetMode = false;
             localStorage.removeItem(CLOUD_SESSION_KEY);
             localStorage.removeItem(CLOUD_REVISION_KEY);
             localStorage.removeItem(CLOUD_DIRTY_KEY);
@@ -959,7 +1233,7 @@
         }
 
         function handleCloudError(error, quiet = false) {
-            if (error?.status === 401) {
+            if (error?.status === 401 && cloudSession) {
                 clearCloudSession('登录已失效，请重新登录');
             } else {
                 setCloudStatus('error', error?.message || '云同步暂时不可用，请稍后重试');
@@ -1065,8 +1339,8 @@
             const username = document.getElementById('cloud-username').value.trim();
             const password = document.getElementById('cloud-password').value;
             const inviteCode = document.getElementById('cloud-invite-code').value;
-            if (!username || password.length < 10 || !inviteCode) {
-                showToast('请填写同步名称、至少10位私人密码和管理员邀请码');
+            if (!username || password.length < 6 || !inviteCode) {
+                showToast('请填写同步账号、至少6位同步密码和邀请码');
                 return;
             }
             setCloudAuthBusy(true);
@@ -1080,7 +1354,7 @@
                 cloudDirty = true;
                 localStorage.setItem(CLOUD_DIRTY_KEY, '1');
                 const uploaded = await pushCloudData(true);
-                if (uploaded) showToast('注册成功，本机全部记录已安全上传');
+                if (uploaded) showToast('注册成功，本机记录已安全上传');
                 document.getElementById('cloud-password').value = '';
                 document.getElementById('cloud-invite-code').value = '';
             } catch (error) {
@@ -1094,7 +1368,7 @@
             const username = document.getElementById('cloud-username').value.trim();
             const password = document.getElementById('cloud-password').value;
             if (!username || !password) {
-                showToast('请输入同步名称和私人密码');
+                showToast('请输入同步账号和同步密码');
                 return;
             }
             setCloudAuthBusy(true);
@@ -1107,6 +1381,35 @@
                 });
                 storeCloudSession(payload);
                 document.getElementById('cloud-password').value = '';
+                await pullCloudData(true);
+            } catch (error) {
+                handleCloudError(error);
+            } finally {
+                setCloudAuthBusy(false);
+            }
+        }
+
+        async function resetCloudPassword() {
+            const username = document.getElementById('cloud-reset-username').value.trim();
+            const recoveryCode = document.getElementById('cloud-recovery-input').value.trim();
+            const newPassword = document.getElementById('cloud-new-password').value;
+            if (!username || !recoveryCode || newPassword.length < 6) {
+                showToast('请填写同步账号、恢复码和至少6位的新密码');
+                return;
+            }
+            setCloudAuthBusy(true);
+            setCloudStatus('syncing', '正在重设密码…');
+            saveCloudSafetyBackup('before-password-reset');
+            try {
+                const payload = await cloudApi('/reset-password', {
+                    method: 'POST',
+                    body: JSON.stringify({ username, recoveryCode, newPassword })
+                });
+                cloudResetMode = false;
+                storeCloudSession(payload);
+                document.getElementById('cloud-recovery-input').value = '';
+                document.getElementById('cloud-new-password').value = '';
+                showToast('密码已重设，正在恢复云端记录');
                 await pullCloudData(true);
             } catch (error) {
                 handleCloudError(error);
@@ -1153,6 +1456,12 @@
             renderCloudPanel();
             setCloudStatus('online', cloudDirty ? '本机有待上传的修改' : '已登录，正在检查云端记录');
             setTimeout(() => pullCloudData(false, true), 300);
+        }
+
+        function clearAllRecordsOnce() {
+            if (localStorage.getItem('ddRecordResetVersion') === RECORD_RESET_VERSION) return;
+            [...DATA_STORAGE_KEYS, WEATHER_CACHE_KEY].forEach(key => localStorage.removeItem(key));
+            localStorage.setItem('ddRecordResetVersion', RECORD_RESET_VERSION);
         }
 
         function exportAllData() {
@@ -1230,24 +1539,24 @@
                 saveSettingsData();
             }
             migrateCustomCountdowns();
+            migrateHealthHabits();
+            migrateCountdownWeekday();
             migrateStoredData();
         }
 
-        function seedImportedLogTodos() {
-            if (appSettings.importedLogVersion === IMPORTED_LOG_VERSION) return;
-            Object.entries(IMPORTED_LOG_TODOS).forEach(([dateKey, importedItems]) => {
-                if (!Array.isArray(todos[dateKey])) todos[dateKey] = [];
-                const existingTexts = new Set(todos[dateKey].map(item => String(item.text || '').replace(/\s+/g, '').trim()));
-                importedItems.forEach(item => {
-                    const textKey = String(item.text || '').replace(/\s+/g, '').trim();
-                    if (!textKey || existingTexts.has(textKey)) return;
-                    todos[dateKey].push({ ...item });
-                    existingTexts.add(textKey);
-                });
-            });
-            appSettings.importedLogVersion = IMPORTED_LOG_VERSION;
-            saveTodos();
-            saveSettingsData();
+        function migrateHealthHabits() {
+            const before = JSON.stringify(appSettings.healthHabits);
+            const selected = Array.isArray(appSettings.healthHabits) ? appSettings.healthHabits : DEFAULT_HEALTH_HABITS;
+            appSettings.healthHabits = [...new Set(selected)].filter(type => HEALTH_HABITS[type]);
+            if (before !== JSON.stringify(appSettings.healthHabits)) saveSettingsData();
+        }
+
+        function migrateCountdownWeekday() {
+            const weekday = Number(appSettings.countdownWeekday);
+            if (!Number.isInteger(weekday) || weekday < 0 || weekday > 6) {
+                appSettings.countdownWeekday = 1;
+                saveSettingsData();
+            }
         }
 
         function migrateCustomCountdowns() {
@@ -1278,6 +1587,7 @@
             recentGoals.forEach(goal => {
                 if (!goal.id) { goal.id = makeId('goal'); changed = true; }
                 if (!goal.startDate) { goal.startDate = todayKey; changed = true; }
+                if (!goal.taskDate) { goal.taskDate = goal.startDate; changed = true; }
                 if (goal.completed && !goal.endDate) { goal.endDate = todayKey; changed = true; }
             });
             if (changed) { saveTodos(); save('ddRecentGoals', recentGoals); }
@@ -1296,6 +1606,26 @@
             document.getElementById('app-name').textContent = name;
             document.title = `${name}自律打卡系统`;
             document.querySelector('meta[name="app-name"]').setAttribute('content', name);
+        }
+
+        function applyTheme() {
+            const themeName = THEMES[appSettings.theme] ? appSettings.theme : 'blue';
+            const theme = THEMES[themeName];
+            const root = document.documentElement;
+            root.style.setProperty('--primary-color', theme.primary);
+            root.style.setProperty('--primary-dark', theme.dark);
+            root.style.setProperty('--primary-soft', theme.soft);
+            root.style.setProperty('--bg-color', theme.bg);
+            root.style.setProperty('--border-color', theme.border);
+            root.style.setProperty('--shadow', `0 8px 28px ${theme.shadow}`);
+            document.querySelectorAll('.theme-swatch').forEach(button => button.classList.toggle('active', button.dataset.theme === themeName));
+        }
+
+        function setTheme(themeName) {
+            if (!THEMES[themeName]) return;
+            appSettings.theme = themeName;
+            saveSettingsData();
+            applyTheme();
         }
 
         function safeFileName(name) {
@@ -1344,10 +1674,35 @@
             }
         }
 
+        function toggleWeekdayCountdownEditor(event) {
+            event?.stopPropagation();
+            const card = document.getElementById('weekday-countdown-card');
+            card.classList.toggle('editing');
+            document.getElementById('weekday-countdown-picker').value = String(Number(appSettings.countdownWeekday) || 0);
+        }
+
+        function closeWeekdayCountdownEditorWhenClickingOutside(event) {
+            const card = document.getElementById('weekday-countdown-card');
+            if (card?.classList.contains('editing') && !card.contains(event.target)) card.classList.remove('editing');
+        }
+
+        function setCountdownWeekday(value) {
+            const weekday = Number(value);
+            if (!Number.isInteger(weekday) || weekday < 0 || weekday > 6) return;
+            appSettings.countdownWeekday = weekday;
+            saveSettingsData();
+            updateCountdowns();
+            document.getElementById('weekday-countdown-card').classList.remove('editing');
+            showToast(`已改为距离${WEEKDAY_NAMES[weekday]}`);
+        }
+
         function updateCountdowns() {
             const now = new Date();
             now.setHours(0, 0, 0, 0);
-            const weekdayDiff = (1 - now.getDay() + 7) % 7;
+            const targetWeekday = Number.isInteger(Number(appSettings.countdownWeekday)) ? Number(appSettings.countdownWeekday) : 1;
+            const weekdayDiff = (targetWeekday - now.getDay() + 7) % 7;
+            document.getElementById('weekday-countdown-label').textContent = `距离${WEEKDAY_NAMES[targetWeekday]}`;
+            document.getElementById('weekday-countdown-picker').value = String(targetWeekday);
             document.getElementById('cd-weekday').textContent = `${weekdayDiff}天`;
 
             const holiday = getNextStatutoryHoliday(now);
@@ -1501,7 +1856,10 @@
             document.getElementById(`page-${pageId}`).classList.remove('hidden');
             document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
             if (navItem) navItem.classList.add('active');
-            if (pageId === 'stats') renderStatsCalendar();
+            if (pageId === 'stats') {
+                renderStatsCalendar();
+            }
+            if (pageId === 'stats' || pageId === 'home') loadLocalWeather();
         }
 
         function isWithinCheckinWindow(type, now = new Date()) {
@@ -1530,6 +1888,10 @@
             renderStatsCalendar();
         }
 
+        function goalDateKey(goal) {
+            return goal?.taskDate || goal?.startDate || goal?.endDate || formatDateKey(new Date());
+        }
+
         function renderSmallCalendar() {
             const grid = document.getElementById('calendar-grid');
             const year = currentCalendarDate.getFullYear();
@@ -1544,8 +1906,9 @@
                 const key = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
                 const classes = ['cal-day'];
                 if (key === todayKey) classes.push('today');
-                if (todos[key] && todos[key].length) classes.push('has-todo');
-                html += `<div class="${classes.join(' ')}">${day}</div>`;
+                if (key === selectedTaskDate) classes.push('selected');
+                if ((todos[key] && todos[key].length) || recentGoals.some(goal => goalDateKey(goal) === key)) classes.push('has-todo');
+                html += `<button type="button" class="${classes.join(' ')}" onclick="showDateTasks('${key}')" aria-label="查看${year}年${month + 1}月${day}日任务">${day}</button>`;
             }
             grid.innerHTML = html;
         }
@@ -1555,20 +1918,52 @@
             renderSmallCalendar();
         }
 
+        function showDateTasks(dateKey) {
+            if (!/^\d{4}-\d{2}-\d{2}$/.test(dateKey)) return;
+            selectedTaskDate = dateKey;
+            renderSmallCalendar();
+            renderRecentGoals();
+        }
+
+        function showUpcomingGoals() {
+            selectedTaskDate = null;
+            renderSmallCalendar();
+            renderRecentGoals();
+        }
+
         function renderRecentGoals() {
             const list = document.getElementById('recent-goal-list');
-            let completed = 0;
-            if (!recentGoals.length) {
-                list.innerHTML = '<li class="empty-state">还没有近期待办，写下第一件要推进的事吧。</li>';
+            const datedMode = Boolean(selectedTaskDate);
+            const visibleGoals = recentGoals
+                .map((goal, index) => ({ goal, index }))
+                .filter(item => datedMode ? goalDateKey(item.goal) === selectedTaskDate : !item.goal.completed);
+            const completed = visibleGoals.filter(item => item.goal.completed).length;
+            const title = document.getElementById('goal-panel-title');
+            const backButton = document.getElementById('goal-back-btn');
+            const input = document.getElementById('new-goal-input');
+            if (datedMode) {
+                const date = parseLocalDateKey(selectedTaskDate);
+                title.textContent = `📅 ${date.getMonth() + 1}月${date.getDate()}日任务`;
+                backButton.classList.remove('hidden');
+                input.placeholder = `添加${date.getMonth() + 1}月${date.getDate()}日任务，按回车确认`;
             } else {
-                list.innerHTML = recentGoals.map((goal, index) => {
-                    if (goal.completed) completed++;
+                title.textContent = '📌 近期待办';
+                backButton.classList.add('hidden');
+                input.placeholder = '添加新任务，按回车确认';
+            }
+            if (!visibleGoals.length) {
+                list.innerHTML = `<li class="empty-state">${datedMode ? '这一天还没有任务，可以在上方添加。' : '还没有近期待办，写下第一件要推进的事吧。'}</li>`;
+            } else {
+                list.innerHTML = visibleGoals.map(({ goal, index }) => {
                     return `<li class="todo-item ${goal.completed ? 'completed' : ''}" onclick="toggleRecentGoal(${index})">
                         <span class="custom-checkbox"></span><span class="todo-text">${escapeHTML(goal.text)}</span>
+                        <span class="todo-edit" onclick="event.stopPropagation(); editRecentGoal(${index})" title="编辑任务">✎</span>
                         <span class="todo-delete" onclick="event.stopPropagation(); deleteRecentGoal(${index})">✕</span></li>`;
                 }).join('');
             }
-            document.getElementById('goal-count').textContent = `${completed} / ${recentGoals.length} 完成`;
+            document.getElementById('goal-count').textContent = datedMode
+                ? `${completed} / ${visibleGoals.length} 完成`
+                : `${visibleGoals.length} 项待完成`;
         }
 
         function handleGoalInput(event) { if (event.key === 'Enter') { event.preventDefault(); addRecentGoal(); } }
@@ -1576,10 +1971,12 @@
             const input = document.getElementById('new-goal-input');
             const text = input.value.trim();
             if (!text) return;
-            recentGoals.push({ id: makeId('goal'), text, completed: false, startDate: formatDateKey(new Date()), endDate: null });
+            const taskDate = selectedTaskDate || formatDateKey(new Date());
+            recentGoals.push({ id: makeId('goal'), text, completed: false, taskDate, startDate: taskDate, endDate: null });
             save('ddRecentGoals', recentGoals);
             input.value = '';
             renderRecentGoals();
+            renderSmallCalendar();
             renderStatsCalendar();
         }
         function toggleRecentGoal(index) {
@@ -1588,12 +1985,25 @@
             recentGoals[index].endDate = recentGoals[index].completed ? formatDateKey(new Date()) : null;
             save('ddRecentGoals', recentGoals);
             renderRecentGoals();
+            renderSmallCalendar();
             renderStatsCalendar();
+        }
+        function editRecentGoal(index) {
+            const goal = recentGoals[index];
+            if (!goal) return;
+            const value = window.prompt('修改任务内容：', goal.text);
+            if (value === null) return;
+            const text = value.trim();
+            if (!text) { showToast('任务内容不能为空'); return; }
+            goal.text = text;
+            save('ddRecentGoals', recentGoals);
+            renderRecentGoals();
         }
         function deleteRecentGoal(index) {
             recentGoals.splice(index, 1);
             save('ddRecentGoals', recentGoals);
             renderRecentGoals();
+            renderSmallCalendar();
             renderStatsCalendar();
         }
 
@@ -1670,15 +2080,6 @@
             updateStopwatchDisplay();
         }
 
-        function addManualSport() {
-            const input = document.getElementById('manual-sport-min');
-            const minutes = Number.parseInt(input.value, 10);
-            if (!Number.isFinite(minutes) || minutes <= 0) return;
-            addSportTime(minutes, currentSportType);
-            input.value = '';
-            showToast(`${SPORT_NAMES[currentSportType]}记录成功：${minutes}分钟`);
-        }
-
         function formatMinutes(minutes) {
             const total = Math.max(0, Math.round(Number(minutes) || 0));
             if (total < 60) return `${total}分钟`;
@@ -1697,13 +2098,52 @@
 
         function updateLifeStatus() {
             const day = historyData[formatDateKey(new Date())] || { focus: 0, sport: 0 };
+            const activities = Array.isArray(day.activities) ? day.activities : [];
             const runningFocus = timerInterval && timerStartLeftSec !== null ? Math.max(0, Math.floor((timerStartLeftSec - timeLeft) / 60)) : 0;
             const focusMinutes = (Number(day.focus) || 0) + runningFocus;
             const sportMinutes = Number(day.sport) || 0;
+            const sportNames = [...new Set(activities.filter(item => item.type !== 'focus').map(item => item.name || SPORT_NAMES[item.type] || '运动'))].join('、');
+            const focusNames = [...new Set(activities.filter(item => item.type === 'focus').map(item => item.name || '专注'))].join('、');
             document.getElementById('life-focus-hr').textContent = (focusMinutes / 60).toFixed(1);
-            document.getElementById('life-focus-min').textContent = `${focusMinutes} 分钟`;
+            document.getElementById('life-focus-min').textContent = `${focusMinutes} 分钟${focusNames ? ` · ${focusNames}` : ''}`;
             document.getElementById('life-sport-hr').textContent = (sportMinutes / 60).toFixed(1);
-            document.getElementById('life-sport-min').textContent = `${sportMinutes} 分钟`;
+            document.getElementById('life-sport-min').textContent = `${sportMinutes} 分钟${sportNames ? ` · ${sportNames}` : ''}`;
+        }
+
+        function editTodayStatus(kind) {
+            const isSport = kind === 'sport';
+            if (!isSport && kind !== 'focus') return;
+            const key = formatDateKey(new Date());
+            const day = ensureHistoryDay(key);
+            const activities = day.activities;
+            const existing = activities.filter(item => isSport ? item.type !== 'focus' : item.type === 'focus');
+            const defaultName = existing[existing.length - 1]?.name || (isSport ? '运动' : '学习专注');
+            const nameInput = window.prompt(`请输入今日${isSport ? '运动' : '专注'}类型：`, defaultName);
+            if (nameInput === null) return;
+            const name = nameInput.trim().slice(0, 30);
+            if (!name) { showToast('类型不能为空'); return; }
+            const currentMinutes = Math.round(Number(day[kind]) || 0);
+            const minutesInput = window.prompt(`请输入今日${isSport ? '运动' : '专注'}时长（分钟，输入0可清除）：`, String(currentMinutes));
+            if (minutesInput === null) return;
+            const minutes = Number(minutesInput);
+            if (!Number.isFinite(minutes) || minutes < 0 || minutes > 1440) {
+                showToast('请输入0到1440之间的有效分钟数');
+                return;
+            }
+            const roundedMinutes = Math.round(minutes);
+            if (isSport) {
+                day.sport = roundedMinutes;
+                day.activities = activities.filter(item => item.type === 'focus');
+                if (roundedMinutes > 0) day.activities.push({ type: 'manual-sport', name, minutes: roundedMinutes, at: Date.now() });
+            } else {
+                day.focus = roundedMinutes;
+                day.activities = activities.filter(item => item.type !== 'focus');
+                if (roundedMinutes > 0) day.activities.push({ type: 'focus', name, minutes: roundedMinutes, at: Date.now() });
+            }
+            saveHistoryData();
+            updateLifeStatus();
+            renderStatsCalendar();
+            showToast(`今日${isSport ? '运动' : '专注'}已更新`);
         }
 
         function addSportTime(minutes, type) {
@@ -1800,23 +2240,62 @@
 
         function getTodayHealth(create = false) {
             const key = formatDateKey(new Date());
-            if (create && !healthData[key]) healthData[key] = { sleep: false, meal: false, medicine: false };
+            if (create && !healthData[key]) healthData[key] = {};
             return healthData[key] || null;
+        }
+
+        function selectedHealthHabits() {
+            return Array.isArray(appSettings.healthHabits)
+                ? appSettings.healthHabits.filter(type => HEALTH_HABITS[type])
+                : [...DEFAULT_HEALTH_HABITS];
+        }
+
+        function renderHealthHabitSelector() {
+            const selected = new Set(selectedHealthHabits());
+            document.getElementById('health-selector').innerHTML = Object.entries(HEALTH_HABITS).map(([type, habit]) => `
+                <label class="health-selector-option">
+                    <input type="checkbox" ${selected.has(type) ? 'checked' : ''} onchange="setHealthHabitVisible('${type}',this.checked)">
+                    <span>${habit.emoji} ${habit.label}</span>
+                </label>
+            `).join('');
+        }
+
+        function toggleHealthHabitEditor(event) {
+            event?.stopPropagation();
+            const card = document.getElementById('health-card');
+            card.classList.toggle('editing');
+            if (card.classList.contains('editing')) renderHealthHabitSelector();
+        }
+
+        function closeHealthHabitEditorWhenClickingOutside(event) {
+            const card = document.getElementById('health-card');
+            if (card?.classList.contains('editing') && !card.contains(event.target)) card.classList.remove('editing');
+        }
+
+        function setHealthHabitVisible(type, visible) {
+            if (!HEALTH_HABITS[type]) return;
+            const selected = selectedHealthHabits().filter(item => item !== type);
+            if (visible) selected.push(type);
+            appSettings.healthHabits = Object.keys(HEALTH_HABITS).filter(item => selected.includes(item));
+            saveSettingsData();
+            renderHealth();
         }
 
         function renderHealth() {
             const data = getTodayHealth(false) || {};
-            ['sleep', 'meal', 'medicine'].forEach(type => {
-                const row = document.getElementById(`health-${type}`);
-                row.classList.toggle('done', Boolean(data[type]));
-                row.querySelector('.health-check').textContent = data[type] ? '✓' : '';
-            });
+            document.getElementById('health-list').innerHTML = selectedHealthHabits().map(type => {
+                const habit = HEALTH_HABITS[type];
+                const done = Boolean(data[type]);
+                return `<button class="health-row ${done ? 'done' : ''}" id="health-${type}" onclick="toggleHealth('${type}')"><span>${habit.emoji} ${habit.label}</span><span class="health-check">${done ? '✓' : ''}</span></button>`;
+            }).join('');
+            renderHealthHabitSelector();
             const mood = Number.isFinite(Number(data.mood)) ? Number(data.mood) : 50;
             document.getElementById('mood-slider').value = mood;
             previewMood(mood);
         }
 
         function toggleHealth(type) {
+            if (!HEALTH_HABITS[type]) return;
             const data = getTodayHealth(true);
             data[type] = !data[type];
             save('ddHealthData', healthData);
@@ -1862,16 +2341,84 @@
             return { ...ALMANAC_FALLBACKS[index], source: '本地万年历参考', date: key };
         }
 
+        function lunarDayText(day) {
+            const names = ['初一','初二','初三','初四','初五','初六','初七','初八','初九','初十','十一','十二','十三','十四','十五','十六','十七','十八','十九','二十','廿一','廿二','廿三','廿四','廿五','廿六','廿七','廿八','廿九','三十'];
+            return names[Math.max(1, Math.min(30, Number(day))) - 1] || String(day);
+        }
+
+        function getLunarInfo(date) {
+            try {
+                const numericFormatter = new Intl.DateTimeFormat('zh-CN-u-ca-chinese', { month: 'numeric', day: 'numeric' });
+                const displayFormatter = new Intl.DateTimeFormat('zh-CN-u-ca-chinese', { year: 'numeric', month: 'long', day: 'numeric' });
+                const numericParts = numericFormatter.formatToParts(date);
+                const displayParts = displayFormatter.formatToParts(date);
+                const rawMonth = numericParts.find(part => part.type === 'month')?.value || '';
+                const month = Number(String(rawMonth).replace(/\D/g, ''));
+                const day = Number(numericParts.find(part => part.type === 'day')?.value);
+                const monthText = displayParts.find(part => part.type === 'month')?.value || `${month}月`;
+                const yearName = displayParts.find(part => part.type === 'yearName')?.value || '';
+                return { month, day, text: `农历${yearName ? `${yearName}年` : ''}${monthText}${lunarDayText(day)}` };
+            } catch (_) {
+                return { month: 0, day: 0, text: '农历日期暂不可用' };
+            }
+        }
+
+        function solarTermDate(year, index) {
+            const base = Date.UTC(1900, 0, 6, 2, 5);
+            const instant = new Date(base + 31556925974.7 * (year - 1900) + SOLAR_TERM_MINUTES[index] * 60000);
+            return new Date(instant.getFullYear(), instant.getMonth(), instant.getDate());
+        }
+
+        function getSolarTermInfo(date) {
+            const today = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+            const terms = [];
+            for (let year = today.getFullYear(); year <= today.getFullYear() + 1; year++) {
+                SOLAR_TERM_NAMES.forEach((name, index) => terms.push({ name, date: solarTermDate(year, index) }));
+            }
+            const current = terms.find(term => term.date.getTime() === today.getTime());
+            const next = terms.find(term => term.date > today);
+            return { current, next, daysToNext: next ? Math.round((next.date - today) / DAY_MS) : 0 };
+        }
+
+        function getFestivalNames(date, lunarInfo, solarTerm) {
+            const names = [];
+            const solarKey = `${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+            if (SOLAR_FESTIVALS[solarKey]) names.push(SOLAR_FESTIVALS[solarKey]);
+            const lunarFestival = LUNAR_FESTIVALS[`${lunarInfo.month}-${lunarInfo.day}`];
+            if (lunarFestival) names.push(lunarFestival);
+            const tomorrow = new Date(date.getFullYear(), date.getMonth(), date.getDate() + 1);
+            const tomorrowLunar = getLunarInfo(tomorrow);
+            if (tomorrowLunar.month === 1 && tomorrowLunar.day === 1) names.push('除夕');
+            if (solarTerm?.name === '清明' && !names.includes('清明节')) names.push('清明节');
+            return [...new Set(names)];
+        }
+
+        function renderPerpetualCalendar(date = new Date()) {
+            const lunar = getLunarInfo(date);
+            const term = getSolarTermInfo(date);
+            const festivals = getFestivalNames(date, lunar, term.current);
+            const tags = festivals.map(name => `<span class="perpetual-tag">节日 · ${escapeHTML(name)}</span>`);
+            if (term.current) {
+                tags.push(`<span class="perpetual-tag">今日节气 · ${escapeHTML(term.current.name)}</span>`);
+            } else if (term.next) {
+                tags.push(`<span class="perpetual-tag upcoming">下一节气 · ${escapeHTML(term.next.name)} · ${term.daysToNext}天</span>`);
+            }
+            const solarText = date.toLocaleDateString('zh-CN', { year: 'numeric', month: 'long', day: 'numeric' });
+            const weekday = date.toLocaleDateString('zh-CN', { weekday: 'long' });
+            document.querySelectorAll('[data-almanac-day]').forEach(node => { node.textContent = date.getDate(); });
+            document.querySelectorAll('[data-almanac-solar]').forEach(node => { node.textContent = solarText; });
+            document.querySelectorAll('[data-almanac-weekday]').forEach(node => { node.textContent = weekday; });
+            document.querySelectorAll('[data-almanac-lunar]').forEach(node => { node.textContent = lunar.text; });
+            document.querySelectorAll('[data-almanac-tags]').forEach(node => { node.innerHTML = tags.join(''); });
+        }
+
         function renderAlmanac(record) {
             const yi = record?.yi || '规划今日、整理环境、保持专注';
             const ji = record?.ji || '拖延冲动、熬夜透支、仓促决定';
-            const yiElement = document.getElementById('almanac-yi');
-            const jiElement = document.getElementById('almanac-ji');
-            yiElement.textContent = yi;
-            jiElement.textContent = ji;
-            yiElement.title = yi;
-            jiElement.title = ji;
-            document.getElementById('almanac-source').textContent = record?.source || '万年历今日宜忌';
+            document.querySelectorAll('[data-almanac-yi]').forEach(node => { node.textContent = yi; node.title = yi; });
+            document.querySelectorAll('[data-almanac-ji]').forEach(node => { node.textContent = ji; node.title = ji; });
+            document.querySelectorAll('[data-almanac-source]').forEach(node => { node.textContent = record?.source || '万年历今日宜忌'; });
+            renderPerpetualCalendar(new Date());
         }
 
         async function loadTodayAlmanac() {
@@ -1911,6 +2458,251 @@
             renderStatsCalendar();
         }
 
+        function renderTaskStats() {
+            const total = recentGoals.length;
+            const completed = recentGoals.filter(goal => Boolean(goal.completed)).length;
+            const pending = Math.max(0, total - completed);
+            const percent = total ? Math.round(completed / total * 100) : 0;
+            [
+                { prefix: '', ring: 'task-progress-ring' },
+                { prefix: 'home-', ring: 'home-task-progress-ring' }
+            ].forEach(target => {
+                const ring = document.getElementById(target.ring);
+                if (!ring) return;
+                ring.style.setProperty('--task-progress', `${percent * 3.6}deg`);
+                ring.setAttribute('aria-label', `近期待办完成率 ${percent}%`);
+                document.getElementById(`${target.prefix}task-progress-value`).textContent = `${percent}%`;
+                document.getElementById(`${target.prefix}task-stat-done`).textContent = completed;
+                document.getElementById(`${target.prefix}task-stat-pending`).textContent = pending;
+                document.getElementById(`${target.prefix}task-stat-summary`).textContent = total
+                    ? `已完成 ${completed} / ${total} 项`
+                    : '还没有近期待办';
+            });
+        }
+
+        function pickCheckinMonth(value) {
+            if (!/^\d{4}-\d{2}$/.test(value)) return;
+            const [year, month] = value.split('-').map(Number);
+            checkinCalendarDate = new Date(year, month - 1, 1);
+            renderCheckinCalendar();
+        }
+
+        function renderCheckinCalendar() {
+            const year = checkinCalendarDate.getFullYear();
+            const month = checkinCalendarDate.getMonth();
+            const today = new Date();
+            const todayStart = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+            const todayKey = formatDateKey(today);
+            const firstWeekday = (new Date(year, month, 1).getDay() + 6) % 7;
+            const totalDays = new Date(year, month + 1, 0).getDate();
+            let totalCheckins = 0;
+            let perfectDays = 0;
+            let html = ['一', '二', '三', '四', '五', '六', '日'].map(day => `<div class="checkin-weekday">${day}</div>`).join('');
+            for (let i = 0; i < firstWeekday; i++) html += '<div class="checkin-mini-day"></div>';
+            for (let day = 1; day <= totalDays; day++) {
+                const date = new Date(year, month, day);
+                const key = formatDateKey(date);
+                const record = checkinData[key] || {};
+                const count = ['am', 'pm', 'night'].reduce((sum, type) => sum + (record[type] ? 1 : 0), 0);
+                totalCheckins += count;
+                if (count === 3) perfectDays++;
+                const classes = ['checkin-mini-day'];
+                const hasSport = getSportEntries(historyData[key] || {}).length > 0;
+                if (key === todayKey) classes.push('today');
+                if (date > todayStart) classes.push('future');
+                if (count === 3) classes.push('perfect');
+                if (hasSport) classes.push('has-sport');
+                html += `<div class="${classes.join(' ')}" title="${year}年${month + 1}月${day}日：完成 ${count} 次打卡${hasSport ? '，有运动记录' : ''}"><span class="checkin-stars">${'★'.repeat(count)}</span><span class="mini-day-number">${day}</span></div>`;
+            }
+            [
+                { grid: 'checkin-calendar-grid', picker: 'checkin-month-picker', summary: 'checkin-month-summary' },
+                { grid: 'home-checkin-calendar-grid', picker: 'home-checkin-month-picker', summary: 'home-checkin-month-summary' }
+            ].forEach(target => {
+                const grid = document.getElementById(target.grid);
+                if (!grid) return;
+                grid.innerHTML = html;
+                document.getElementById(target.picker).value = `${year}-${String(month + 1).padStart(2, '0')}`;
+                document.getElementById(target.summary).textContent = `本月累计 ${totalCheckins} 次打卡 · ${perfectDays} 天满勤`;
+            });
+        }
+
+        function weatherIcon(code, isDay = 1) {
+            const value = Number(code);
+            if (value === 0) return isDay ? '☀️' : '🌙';
+            if (value === 1 || value === 2) return isDay ? '🌤️' : '☁️';
+            if (value === 3) return '☁️';
+            if (value === 45 || value === 48) return '🌫️';
+            if ((value >= 51 && value <= 67) || (value >= 80 && value <= 82)) return value >= 80 ? '🌦️' : '🌧️';
+            if ((value >= 71 && value <= 77) || value === 85 || value === 86) return '🌨️';
+            if (value >= 95) return '⛈️';
+            return '🌥️';
+        }
+
+        function weatherText(code) {
+            const value = Number(code);
+            if (value === 0) return '晴';
+            if (value === 1) return '大部晴朗';
+            if (value === 2) return '多云';
+            if (value === 3) return '阴';
+            if (value === 45 || value === 48) return '有雾';
+            if (value >= 51 && value <= 57) return '毛毛雨';
+            if (value >= 61 && value <= 67) return '有雨';
+            if (value >= 71 && value <= 77) return '有雪';
+            if (value >= 80 && value <= 82) return '阵雨';
+            if (value === 85 || value === 86) return '阵雪';
+            if (value >= 95) return '雷雨';
+            return '天气变化';
+        }
+
+        function windDirectionName(degrees) {
+            const names = ['北风', '东北风', '东风', '东南风', '南风', '西南风', '西风', '西北风'];
+            const value = Number(degrees);
+            return Number.isFinite(value) ? names[Math.round(value / 45) % 8] : '风向不定';
+        }
+
+        function windScaleFromKmh(speed) {
+            const thresholds = [1, 6, 12, 20, 29, 39, 50, 62, 75, 89, 103, 118];
+            const value = Math.max(0, Number(speed) || 0);
+            const index = thresholds.findIndex(limit => value < limit);
+            return index === -1 ? 12 : index;
+        }
+
+        function buildWeatherTrend(highs, lows) {
+            const maxTemps = highs.map(Number).filter(Number.isFinite);
+            const minTemps = lows.map(Number).filter(Number.isFinite);
+            const all = [...maxTemps, ...minTemps];
+            if (!all.length) return '';
+            const top = Math.max(...all);
+            const bottom = Math.min(...all);
+            const range = Math.max(1, top - bottom);
+            const xAt = index => 5 + index * 22.5;
+            const yAt = value => 7 + (top - value) / range * 29;
+            const makePoints = values => values.map((value, index) => `${xAt(index)},${yAt(Number(value))}`).join(' ');
+            const highDots = highs.map((value, index) => `<circle cx="${xAt(index)}" cy="${yAt(Number(value))}" r="1.5" fill="#f39a45"/>`).join('');
+            const lowDots = lows.map((value, index) => `<circle cx="${xAt(index)}" cy="${yAt(Number(value))}" r="1.5" fill="#75b7ed"/>`).join('');
+            return `<svg class="weather-trend" viewBox="0 0 100 44" preserveAspectRatio="none" aria-hidden="true">
+                <polyline points="${makePoints(highs)}" fill="none" stroke="#f39a45" stroke-width="1.1" vector-effect="non-scaling-stroke"/>
+                <polyline points="${makePoints(lows)}" fill="none" stroke="#75b7ed" stroke-width="1.1" vector-effect="non-scaling-stroke"/>
+                ${highDots}${lowDots}
+            </svg>`;
+        }
+
+        function renderWeather(data, cached = false) {
+            const contents = document.querySelectorAll('[data-weather-content]');
+            if (!contents.length || !data?.current || !data?.daily) return;
+            const current = data.current;
+            const days = (data.daily.time || []).slice(0, 5);
+            const highs = (data.daily.temperature_2m_max || []).slice(0, 5);
+            const lows = (data.daily.temperature_2m_min || []).slice(0, 5);
+            const codes = (data.daily.weather_code || []).slice(0, 5);
+            const forecast = days.map((dateText, index) => {
+                const date = new Date(`${dateText}T12:00:00`);
+                const label = index === 0 ? '今天' : date.toLocaleDateString('zh-CN', { weekday: 'short' });
+                return `<div class="weather-day">
+                    <div class="weather-day-name">${label}</div>
+                    <div class="weather-day-icon" title="${weatherText(codes[index])}">${weatherIcon(codes[index], 1)}</div>
+                    <div class="weather-day-temp"><span class="high">${Math.round(Number(highs[index]))}°</span><br><span class="low">${Math.round(Number(lows[index]))}°</span></div>
+                </div>`;
+            }).join('');
+            const updateText = String(current.time || '').split('T')[1]?.slice(0, 5) || new Date().toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit', hour12: false });
+            const place = [data.city, data.region].filter((item, index, array) => item && array.indexOf(item) === index).join(' · ') || 'IP 所在地';
+            const temperature = Math.round(Number(current.temperature_2m));
+            const apparent = Math.round(Number(current.apparent_temperature));
+            const windName = windDirectionName(current.wind_direction_10m);
+            const windScale = windScaleFromKmh(current.wind_speed_10m);
+            const weatherHtml = `<div class="weather-meta"><span class="weather-location">📍 ${escapeHTML(place)}</span><span>${cached ? '缓存天气' : `${updateText}更新`}</span></div>
+                <div class="weather-current">
+                    <div class="weather-temperature">${temperature}<sup>°C</sup></div>
+                    <div><div class="weather-condition">${weatherIcon(current.weather_code, current.is_day)} ${weatherText(current.weather_code)}</div>
+                    <div class="weather-details">≋ ${windName} ${windScale}级<br>💧 相对湿度 ${Math.round(Number(current.relative_humidity_2m))}%<br>体感温度 ${apparent}°C</div></div>
+                </div>
+                <div class="weather-forecast">${forecast}</div>
+                ${buildWeatherTrend(highs, lows)}
+                <div class="weather-source">IP 自动定位 · Open-Meteo${cached ? ' · 当前为离线缓存' : ''}</div>`;
+            contents.forEach(content => {
+                content.className = '';
+                content.innerHTML = weatherHtml;
+            });
+        }
+
+        function renderWeatherError(message) {
+            document.querySelectorAll('[data-weather-content]').forEach(content => {
+                content.className = 'weather-loading';
+                content.innerHTML = `<div>🌥️ ${escapeHTML(message)}<br><button type="button" class="weather-error-action" onclick="loadLocalWeather(true)">重新获取</button></div>`;
+            });
+        }
+
+        async function fetchJSONWithTimeout(url, timeout = 9000) {
+            const controller = new AbortController();
+            const timer = setTimeout(() => controller.abort(), timeout);
+            try {
+                const response = await fetch(url, { signal: controller.signal, cache: 'no-store' });
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                return await response.json();
+            } finally {
+                clearTimeout(timer);
+            }
+        }
+
+        async function locateByIP() {
+            try {
+                const result = await fetchJSONWithTimeout('https://ipwho.is/?lang=zh');
+                if (result?.success !== false && Number.isFinite(Number(result?.latitude)) && Number.isFinite(Number(result?.longitude))) {
+                    return { latitude: Number(result.latitude), longitude: Number(result.longitude), city: result.city, region: result.region };
+                }
+            } catch (_) {}
+            const fallback = await fetchJSONWithTimeout('https://ipapi.co/json/');
+            if (!Number.isFinite(Number(fallback?.latitude)) || !Number.isFinite(Number(fallback?.longitude))) throw new Error('定位失败');
+            return { latitude: Number(fallback.latitude), longitude: Number(fallback.longitude), city: fallback.city, region: fallback.region };
+        }
+
+        async function loadLocalWeather(force = false) {
+            const contents = document.querySelectorAll('[data-weather-content]');
+            const refreshButtons = document.querySelectorAll('[data-weather-refresh]');
+            if (!contents.length || weatherLoading || (weatherLoaded && !force)) return;
+            const cached = safeJSON(localStorage.getItem(WEATHER_CACHE_KEY), null);
+            if (!force && cached?.savedAt && Date.now() - cached.savedAt < 30 * 60 * 1000 && cached.data) {
+                renderWeather(cached.data);
+                weatherLoaded = true;
+                return;
+            }
+            weatherLoading = true;
+            refreshButtons.forEach(button => { button.disabled = true; });
+            contents.forEach(content => {
+                content.className = 'weather-loading';
+                content.textContent = '正在根据 IP 获取当地天气…';
+            });
+            try {
+                const location = await locateByIP();
+                const query = new URLSearchParams({
+                    latitude: location.latitude,
+                    longitude: location.longitude,
+                    current: 'temperature_2m,relative_humidity_2m,apparent_temperature,is_day,weather_code,wind_speed_10m,wind_direction_10m',
+                    daily: 'weather_code,temperature_2m_max,temperature_2m_min',
+                    forecast_days: '5',
+                    temperature_unit: 'celsius',
+                    wind_speed_unit: 'kmh',
+                    timezone: 'auto'
+                });
+                const forecast = await fetchJSONWithTimeout(`https://api.open-meteo.com/v1/forecast?${query}`);
+                const data = { city: location.city, region: location.region, current: forecast.current, daily: forecast.daily };
+                if (!data.current || !data.daily) throw new Error('天气数据不完整');
+                localStorage.setItem(WEATHER_CACHE_KEY, JSON.stringify({ savedAt: Date.now(), data }));
+                renderWeather(data);
+                weatherLoaded = true;
+            } catch (_) {
+                if (cached?.data) {
+                    renderWeather(cached.data, true);
+                    weatherLoaded = true;
+                } else {
+                    renderWeatherError('暂时无法联网获取天气');
+                }
+            } finally {
+                weatherLoading = false;
+                refreshButtons.forEach(button => { button.disabled = false; });
+            }
+        }
+
         function getSportEntries(history) {
             const groups = new Map();
             const activities = Array.isArray(history.activities) ? history.activities : [];
@@ -1928,7 +2720,9 @@
             today.setHours(0, 0, 0, 0);
             const yesterday = new Date(today);
             yesterday.setDate(yesterday.getDate() - 1);
-            return dateKey === formatDateKey(today) || dateKey === formatDateKey(yesterday);
+            const dayBeforeYesterday = new Date(today);
+            dayBeforeYesterday.setDate(dayBeforeYesterday.getDate() - 2);
+            return [today, yesterday, dayBeforeYesterday].some(date => dateKey === formatDateKey(date));
         }
 
         function toggleDayEdit(dateKey, event) {
@@ -2026,6 +2820,8 @@
         function renderStatsCalendar() {
             const container = document.getElementById('stats-calendar');
             if (!container) return;
+            renderTaskStats();
+            renderCheckinCalendar();
             const year = statsCalendarDate.getFullYear();
             const month = statsCalendarDate.getMonth();
             document.getElementById('stats-month-picker').value = `${year}-${String(month + 1).padStart(2, '0')}`;
@@ -2048,23 +2844,15 @@
                 const moodExists = Number.isFinite(Number(health.mood));
                 const moodDelete = editing && moodExists ? `<button class="record-delete" onclick="deleteDayRecord('${key}','mood',event)" title="删除心情记录">×</button>` : '';
                 const mood = moodState(health.mood);
-                const moodHtml = `<div class="mood-chip ${moodExists ? '' : 'no-record'}">${moodExists ? `${mood.emoji} 当日心情：${Number(health.mood)}分，${mood.label}` : '😐 当日心情：暂无记录'}${moodDelete}</div>`;
-                const sportEntries = getSportEntries(history);
-                const sportDelete = editing && sportEntries.length ? `<button class="record-delete" onclick="deleteDayRecord('${key}','sport',event)" title="删除运动记录">×</button>` : '';
+                const moodHtml = `<div class="mood-chip ${moodExists ? '' : 'no-record'}" title="${moodExists ? `${Number(health.mood)}分，心情${mood.label}` : '当日心情：暂无'}">${moodExists ? `${mood.emoji} ${Number(health.mood)}分，心情${mood.label}` : '😐 当日心情：暂无'}${moodDelete}</div>`;
                 const focusMinutes = Number(history.focus) || 0;
                 const focusDelete = editing && focusMinutes > 0 ? `<button class="record-delete" onclick="deleteDayRecord('${key}','focus',event)" title="删除专注记录">×</button>` : '';
-                const sportDetails = sportEntries.length
-                    ? sportEntries.map(item => `${escapeHTML(item.name)} ${formatMinutes(item.minutes)}`).join('<br>')
-                    : '下次一定！';
-                const activityHtml = `<div class="record-grid">
-                    <div class="record-block sport"><div class="record-block-title">🏋️ 运动打卡</div><div class="record-block-value">${sportDetails}</div>${sportDelete}</div>
-                    <div class="record-block focus"><div class="record-block-title">🍅 专注时间</div><div class="record-block-value">${focusMinutes > 0 ? formatMinutes(focusMinutes) : '快去学习！'}</div>${focusDelete}</div>
-                </div>`;
+                const focusHtml = `<div class="focus-chip ${focusMinutes > 0 ? '' : 'no-record'}">${focusMinutes > 0 ? `🍅 专注时间：${formatMinutes(focusMinutes)}` : '🍅 专注时间：暂无'}${focusDelete}</div>`;
                 const todosHtml = dayTodos.length
                     ? `<ul class="day-todos">${dayTodos.map((item, index) => `<li><span>✓</span>${editing
                         ? `<span class="editable-completion" contenteditable="true" spellcheck="false" onclick="event.stopPropagation()" onblur="saveEditedCompletion('${key}',${index},this.textContent)">${escapeHTML(item.text)}</span><button class="completion-delete" onclick="deleteDayCompletion('${key}',${index},event)" title="删除这条记录">×</button>`
                         : `<span>${escapeHTML(item.text)}</span>`}</li>`).join('')}</ul>`
-                    : `<div class="no-record" style="margin-top:8px;">${isFuture ? '尚未到来' : '没有今日完成记录'}</div>`;
+                    : `<div class="no-record" style="margin-top:8px;">${isFuture ? '尚未到来' : '暂无完成事项'}</div>`;
                 const addCompletionHtml = editing ? `<div class="day-completion-add">
                     <input type="text" maxlength="100" placeholder="添加记录，按回车" onclick="event.stopPropagation()" onkeydown="handleDayCompletionInput(event,'${key}',this)">
                     <button onclick="addDayCompletion('${key}',this.previousElementSibling,event)" title="添加记录">+</button>
@@ -2072,7 +2860,7 @@
                 const editButton = canEdit ? `<button class="day-edit-btn" onclick="toggleDayEdit('${key}',event)" title="编辑这一天">🖊</button>` : '';
                 html += `<div class="stats-day ${isFuture ? 'future' : ''} ${editing ? 'editing' : ''}" data-date="${key}">
                     <div class="stats-date ${key === todayKey ? 'today' : ''}"><span>${day}</span>${editButton}</div>
-                    ${moodHtml}${activityHtml}<div class="stats-section-title">今日完成</div><div class="day-completions">${todosHtml}${addCompletionHtml}</div>
+                    ${moodHtml}${focusHtml}<div class="day-completions">${todosHtml}${addCompletionHtml}</div>
                 </div>`;
             }
             container.innerHTML = html;
@@ -2094,9 +2882,11 @@
         }
 
         function initialize() {
+            clearAllRecordsOnce();
             loadData();
             activeDateKey = formatDateKey(new Date());
             checkinStatus = checkinData[activeDateKey] || { am: false, pm: false, night: false };
+            applyTheme();
             applyAppName();
             updateTime();
             updateCountdowns();
@@ -2112,10 +2902,13 @@
             appReady = true;
             initializeCloudSync();
             loadTodayAlmanac();
+            loadLocalWeather();
             setInterval(updateTime, 1000);
         }
 
         document.addEventListener('click', closeDayEditWhenClickingOutside);
+        document.addEventListener('click', closeHealthHabitEditorWhenClickingOutside);
+        document.addEventListener('click', closeWeekdayCountdownEditorWhenClickingOutside);
         document.addEventListener('visibilitychange', () => {
             if (document.visibilityState === 'visible' && cloudSession && Date.now() - lastCloudPullAt > 10000) {
                 pullCloudData(false, true);
