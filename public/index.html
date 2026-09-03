@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="app-name" content="点击修改">
-    <meta name="app-version" content="1.04">
+    <meta name="app-version" content="1.05">
     <link rel="icon" type="image/png" href="app-logo.png">
     <title>ChickenCheckin</title>
     <style>
@@ -14,12 +14,16 @@
             --primary-soft: #eaf5fd;
             --bg-color: #eaf5fc;
             --card-bg: #ffffff;
-            --text-color: #203647;
-            --muted-color: #607586;
+            --text-color: #132b3a;
+            --muted-color: #405868;
             --success-color: #27ae60;
             --danger-color: #e74c3c;
             --border-color: #bddced;
             --shadow: 0 8px 28px rgba(52, 152, 219, 0.12);
+            --surface-opacity: .9;
+            --panel-bg: rgba(234,245,252,.9);
+            --soft-surface-bg: rgba(227,241,251,.9);
+            --white-surface-bg: rgba(255,255,255,.9);
         }
 
         * { box-sizing: border-box; }
@@ -32,7 +36,7 @@
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
         }
         body.custom-theme { background-position: center; background-size: cover; background-repeat: no-repeat; background-attachment: fixed; }
-        body.custom-theme .sidebar { background: rgba(255,255,255,.9); backdrop-filter: blur(14px); }
+        body.custom-theme .sidebar { background: var(--card-bg); backdrop-filter: blur(14px); }
         button, input, select { font: inherit; }
         button { -webkit-tap-highlight-color: transparent; }
 
@@ -138,12 +142,12 @@
         }
         .current-date { margin-top: 7px; color: var(--muted-color); font-size: 12px; }
         .almanac-box { display: grid; gap: 7px; text-align: left; }
-        .almanac-row { display: flex; align-items: flex-start; gap: 7px; color: #5f7487; font-size: 12px; line-height: 1.45; }
+        .almanac-row { display: flex; align-items: flex-start; gap: 7px; color: var(--muted-color); font-size: 12px; line-height: 1.45; }
         .almanac-badge { width: 22px; height: 22px; flex: 0 0 22px; display: grid; place-items: center; border-radius: 6px; color: #fff; font-weight: 800; }
         .almanac-row.yi .almanac-badge { background: var(--success-color); }
         .almanac-row.ji .almanac-badge { background: var(--danger-color); }
         .almanac-text { display: -webkit-box; overflow: hidden; -webkit-box-orient: vertical; -webkit-line-clamp: 2; }
-        .almanac-source { color: #a2afb8; font-size: 10px; text-align: right; }
+        .almanac-source { color: #718594; font-size: 10px; text-align: right; }
         .countdown-grid { display: flex; flex-wrap: wrap; gap: 15px; }
         .custom-countdown-cards { display: contents; }
         .countdown-card {
@@ -183,16 +187,16 @@
             font-weight: 800;
         }
         .checkin-container { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
-        .checkin-item { padding: 20px; border-radius: 13px; background: var(--bg-color); text-align: center; }
+        .checkin-item { padding: 20px; border-radius: 13px; background: var(--panel-bg); text-align: center; }
         .checkin-icon { margin-bottom: 10px; font-size: 40px; }
         .checkin-name { font-weight: 800; }
         .checkin-deadline { margin: 5px 0 15px; color: var(--muted-color); font-size: 12px; }
         .status-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; }
-        .status-panel { position: relative; padding: 22px; border: 1px solid var(--border-color); border-radius: 13px; background: var(--bg-color); text-align: center; }
+        .status-panel { position: relative; padding: 22px; border: 1px solid var(--border-color); border-radius: 13px; background: var(--panel-bg); text-align: center; }
         .status-label { margin-bottom: 8px; color: var(--muted-color); font-size: 12px; }
         .status-value { color: var(--primary-color); font-size: 34px; font-weight: 850; }
         .status-unit { margin-left: 4px; color: var(--muted-color); font-size: 14px; }
-        .status-detail { margin-top: 5px; color: #687e8e; font-size: 12px; }
+        .status-detail { margin-top: 5px; color: var(--muted-color); font-size: 12px; }
         .status-tip { margin-top: 10px; color: var(--muted-color); font-size: 11px; line-height: 1.45; }
         .status-edit-btn { position: absolute; top: 10px; right: 11px; width: 29px; height: 29px; padding: 0; border: 0; border-radius: 8px; background: #fff; color: var(--primary-dark); cursor: pointer; font-size: 15px; opacity: 0; pointer-events: none; box-shadow: 0 2px 8px rgba(31,54,71,.1); transition: opacity .18s, transform .18s; }
         .status-panel:hover .status-edit-btn, .status-edit-btn:focus-visible { opacity: 1; pointer-events: auto; }
@@ -214,7 +218,7 @@
         .ghost-btn { background: #fff; color: var(--primary-dark); border: 1px solid var(--border-color); }
 
         .plan-grid { display: grid; grid-template-columns: 310px minmax(0, 1fr); gap: 22px; }
-        .calendar-container { padding: 16px; border-radius: 13px; background: var(--bg-color); }
+        .calendar-container { padding: 16px; border-radius: 13px; background: var(--panel-bg); }
         .cal-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; font-weight: 800; }
         .icon-btn { padding: 5px 7px; border: 0; background: transparent; color: var(--text-color); cursor: pointer; }
         .icon-btn:hover { color: var(--primary-color); }
@@ -261,10 +265,10 @@
             border: 1px solid #dcebf5;
             border-radius: 9px;
             outline: none;
-            background: var(--bg-color);
+            background: var(--panel-bg);
             color: var(--text-color);
         }
-        .todo-input:focus { border-color: var(--primary-color); background: #fff; }
+        .todo-input:focus { border-color: var(--primary-color); background: var(--white-surface-bg); }
         .todo-list { margin: 0; padding: 0; list-style: none; }
         .todo-item {
             display: flex;
@@ -274,7 +278,7 @@
             padding: 11px 14px;
             border: 1px solid #edf3f7;
             border-radius: 9px;
-            background: #fff;
+            background: var(--white-surface-bg);
             cursor: pointer;
             transition: border-color .2s, transform .2s;
         }
@@ -300,7 +304,7 @@
         .todo-delete { padding: 3px 6px; color: #cbd4da; cursor: pointer; opacity: 0; transition: .2s; }
         .todo-item:hover .todo-delete { opacity: 1; }
         .todo-delete:hover { color: var(--danger-color); transform: scale(1.18); }
-        .empty-state { padding: 18px; border: 1px dashed var(--border-color); border-radius: 10px; color: #99a9b5; text-align: center; font-size: 13px; }
+        .empty-state { padding: 18px; border: 1px dashed var(--border-color); border-radius: 10px; color: #667d8c; text-align: center; font-size: 13px; }
 
         .life-grid {
             display: grid;
@@ -322,7 +326,7 @@
             padding: 10px 8px;
             border: 1px solid var(--border-color);
             border-radius: 9px;
-            background: var(--primary-soft);
+            background: var(--soft-surface-bg);
             color: var(--text-color);
             cursor: pointer;
         }
@@ -331,7 +335,7 @@
         .sport-edit-btn { position: absolute; top: 17px; right: 18px; padding: 4px 6px; border: 0; border-radius: 7px; background: transparent; cursor: pointer; font-size: 17px; opacity: 0; transition: .2s; }
         .sport-card:hover .sport-edit-btn, .sport-edit-btn:focus-visible, .sport-card.editing .sport-edit-btn { opacity: 1; }
         .sport-edit-btn:hover { background: var(--primary-soft); }
-        .sport-selector { display: none; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; max-height: 238px; margin-bottom: 14px; padding: 11px; overflow-y: auto; border: 1px dashed var(--primary-color); border-radius: 11px; background: #f8fcff; }
+        .sport-selector { display: none; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; max-height: 238px; margin-bottom: 14px; padding: 11px; overflow-y: auto; border: 1px dashed var(--primary-color); border-radius: 11px; background: var(--white-surface-bg); }
         .sport-card.editing .sport-selector { display: grid; }
         .sport-selector-option { min-width: 0; display: flex; align-items: center; gap: 6px; padding: 7px; border-radius: 8px; color: var(--text-color); cursor: pointer; font-size: 12px; }
         .sport-selector-option:hover { background: var(--primary-soft); }
@@ -366,23 +370,23 @@
             padding: 14px 15px;
             border: 1px solid var(--border-color);
             border-radius: 11px;
-            background: var(--primary-soft);
+            background: var(--soft-surface-bg);
             color: var(--text-color);
             cursor: pointer;
         }
-        .health-row.done { background: #eaf8f0; border-color: #bfe7cf; }
+        .health-row.done { background: rgba(234,248,240,var(--surface-opacity)); border-color: #bfe7cf; }
         .health-check { width: 24px; height: 24px; display: grid; place-items: center; border: 2px solid #b9cbd8; border-radius: 50%; background: #fff; }
         .health-row.done .health-check { border-color: var(--success-color); background: var(--success-color); color: #fff; }
         .health-card { position: relative; }
         .health-edit-btn { position: absolute; top: 17px; right: 18px; padding: 4px 6px; border: 0; border-radius: 7px; background: transparent; cursor: pointer; font-size: 17px; opacity: 0; transition: .2s; }
         .health-card:hover .health-edit-btn, .health-edit-btn:focus-visible, .health-card.editing .health-edit-btn { opacity: 1; }
         .health-edit-btn:hover { background: var(--primary-soft); }
-        .health-selector { display: none; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; margin-bottom: 13px; padding: 12px; border: 1px dashed var(--primary-color); border-radius: 11px; background: #f8fcff; }
+        .health-selector { display: none; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; margin-bottom: 13px; padding: 12px; border: 1px dashed var(--primary-color); border-radius: 11px; background: var(--white-surface-bg); }
         .health-card.editing .health-selector { display: grid; }
         .health-selector-option { min-width: 0; display: flex; align-items: center; gap: 7px; padding: 8px; border-radius: 8px; color: var(--text-color); cursor: pointer; font-size: 12px; }
         .health-selector-option:hover { background: var(--primary-soft); }
         .health-selector-option input { accent-color: var(--primary-color); }
-        .mood-box { margin-top: 14px; padding: 16px 15px 18px; border: 1px solid var(--border-color); border-radius: 11px; background: var(--primary-soft); }
+        .mood-box { margin-top: 14px; padding: 16px 15px 18px; border: 1px solid var(--border-color); border-radius: 11px; background: var(--soft-surface-bg); }
         .mood-heading { display: flex; align-items: center; justify-content: space-between; margin-bottom: 15px; }
         .mood-score { color: var(--primary-color); font-weight: 800; }
         .mood-slider { width: 100%; accent-color: var(--primary-color); cursor: grab; }
@@ -433,8 +437,8 @@
 
         .checkin-summary { color: var(--muted-color); font-size: 11px; font-weight: 650; }
         .checkin-calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; text-align: center; }
-        .checkin-weekday { padding: 2px 0 5px; color: #9aaab5; font-size: 10px; }
-        .checkin-mini-day { min-width: 0; height: 39px; position: relative; display: grid; grid-template-rows: 12px 22px; place-items: center; padding: 2px 0; border-radius: 8px; color: #607483; font-size: 11px; }
+        .checkin-weekday { padding: 2px 0 5px; color: #657b8a; font-size: 10px; }
+        .checkin-mini-day { min-width: 0; height: 39px; position: relative; display: grid; grid-template-rows: 12px 22px; place-items: center; padding: 2px 0; border-radius: 8px; color: var(--muted-color); font-size: 11px; }
         .checkin-mini-day .mini-day-number { width: 23px; height: 23px; display: grid; place-items: center; border-radius: 50%; }
         .checkin-mini-day.today { background: var(--primary-soft); color: var(--primary-dark); font-weight: 900; box-shadow: inset 0 0 0 1px rgba(52, 152, 219, .22); }
         .checkin-mini-day.has-sport .mini-day-number { border: 2px solid #21a864; background: #e9f9f0; color: #157a48; font-weight: 900; box-shadow: 0 0 0 3px rgba(33, 168, 100, .14); }
@@ -458,23 +462,23 @@
         .weather-temperature { color: #0b477a; font-size: 52px; font-weight: 500; line-height: 1; letter-spacing: -3px; }
         .weather-temperature sup { position: relative; top: -18px; margin-left: 4px; font-size: 17px; font-weight: 500; letter-spacing: 0; }
         .weather-condition { margin-bottom: 7px; font-size: 14px; font-weight: 850; }
-        .weather-details { color: #536978; font-size: 11px; line-height: 1.65; }
+        .weather-details { color: var(--muted-color); font-size: 11px; line-height: 1.65; }
         .weather-forecast { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 1px; padding-top: 12px; }
-        .weather-day { min-width: 0; text-align: center; color: #526a7a; font-size: 10px; }
+        .weather-day { min-width: 0; text-align: center; color: var(--muted-color); font-size: 10px; }
         .weather-day-name { height: 18px; font-weight: 750; }
         .weather-day-icon { height: 30px; font-size: 23px; line-height: 30px; }
         .weather-day-temp { font-size: 10px; line-height: 1.55; }
         .weather-day-temp .high { color: #dc7a2a; }
         .weather-day-temp .low { color: #438ac4; }
         .weather-trend { width: 100%; height: 44px; display: block; margin: 1px 0 0; overflow: visible; }
-        .weather-source { margin-top: 8px; color: #a7b4bd; font-size: 9px; text-align: right; }
+        .weather-source { margin-top: 8px; color: #718594; font-size: 9px; text-align: right; }
         .weather-loading { min-height: 236px; display: grid; place-items: center; color: var(--muted-color); font-size: 12px; text-align: center; line-height: 1.7; }
         .weather-error-action { margin-top: 9px; padding: 6px 10px; border: 1px solid var(--border-color); border-radius: 8px; background: #fff; color: var(--primary-dark); cursor: pointer; font-size: 11px; }
         .perpetual-calendar-card { background: var(--card-bg); }
         .perpetual-date { display: grid; grid-template-columns: 62px 1fr; align-items: center; gap: 13px; margin-bottom: 12px; padding-bottom: 12px; border-bottom: 1px solid #edf1f4; }
         .perpetual-day { width: 62px; height: 62px; display: grid; place-items: center; border-radius: 16px; background: linear-gradient(145deg, #3498db, #247bb6); color: #fff; font-size: 31px; font-weight: 900; box-shadow: 0 8px 18px rgba(52,152,219,.2); }
-        .perpetual-solar { color: #536a7a; font-size: 11px; line-height: 1.55; }
-        .perpetual-lunar { display: block; margin-top: 3px; color: #263f52; font-size: 14px; font-weight: 850; }
+        .perpetual-solar { color: var(--muted-color); font-size: 11px; line-height: 1.55; }
+        .perpetual-lunar { display: block; margin-top: 3px; color: var(--text-color); font-size: 14px; font-weight: 850; }
         .perpetual-tags { display: flex; flex-wrap: wrap; gap: 6px; min-height: 25px; margin-bottom: 11px; }
         .perpetual-tag { padding: 4px 8px; border-radius: 999px; background: #fff1dc; color: #a8611c; font-size: 10px; font-weight: 800; }
         .perpetual-tag.upcoming { background: var(--primary-soft); color: var(--primary-dark); }
@@ -492,7 +496,7 @@
             box-shadow: 0 3px 11px rgba(52, 152, 219, .045);
             display: flex;
             flex-direction: column;
-            color: #314a5c;
+            color: var(--text-color);
         }
         .stats-day.blank { height: 90px; background: rgba(255,255,255,.35); border-style: dashed; box-shadow: none; }
         .stats-day.future { opacity: .88; }
@@ -501,20 +505,20 @@
         .stats-date.today > span:first-child { width: 34px; height: 34px; display: grid; place-items: center; border-radius: 50%; background: var(--primary-color); color: #fff; }
         .day-edit-btn { padding: 4px 5px; border: 0; border-radius: 6px; background: transparent; cursor: pointer; font-size: 17px; opacity: 0; }
         .day-edit-btn:hover, .day-edit-btn:focus-visible, .stats-day.editing .day-edit-btn { background: var(--primary-soft); opacity: 1; }
-        .stats-section-title { margin: 9px 0 5px; color: #768997; font-size: 12px; font-weight: 800; }
+        .stats-section-title { margin: 9px 0 5px; color: var(--muted-color); font-size: 12px; font-weight: 800; }
         .mood-chip, .focus-chip { position: relative; margin-bottom: 7px; padding: 7px 9px; border-radius: 8px; font-size: 12px; line-height: 1.4; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .stats-day.editing .mood-chip, .stats-day.editing .focus-chip { padding-right: 28px; }
-        .mood-chip { background: #fff7e6; color: #76531e; }
-        .focus-chip { background: var(--primary-soft); color: #285f88; }
+        .mood-chip { background: rgba(255,247,230,var(--surface-opacity)); color: #76531e; }
+        .focus-chip { background: var(--soft-surface-bg); color: #204f72; }
         .record-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
         .record-block { position: relative; padding: 8px 26px 8px 8px; border-radius: 8px; font-size: 11px; line-height: 1.4; }
-        .record-block.sport { background: #eef8f1; color: #417453; }
-        .record-block.focus { background: var(--primary-soft); color: #356d96; }
+        .record-block.sport { background: rgba(238,248,241,var(--surface-opacity)); color: #315f40; }
+        .record-block.focus { background: var(--soft-surface-bg); color: #285a7f; }
         .record-block-title { margin-bottom: 5px; font-weight: 850; }
         .record-block-value { overflow-wrap: anywhere; }
         .record-delete { position: absolute; top: 5px; right: 6px; width: 19px; height: 19px; padding: 0; border: 0; border-radius: 50%; background: rgba(255,255,255,.82); color: var(--danger-color); cursor: pointer; font-weight: 900; line-height: 19px; }
         .day-todos { margin: 5px 0 0; padding: 0; list-style: none; font-size: 12px; }
-        .day-todos li { display: flex; gap: 5px; margin-bottom: 5px; padding: 5px 7px; border-radius: 7px; background: #f7f9fb; color: #405867; line-height: 1.4; overflow-wrap: anywhere; }
+        .day-todos li { display: flex; gap: 5px; margin-bottom: 5px; padding: 5px 7px; border-radius: 7px; background: #f7f9fb; color: var(--text-color); line-height: 1.4; overflow-wrap: anywhere; }
         .day-completions { min-height: 56px; }
         .editable-completion { flex: 1; min-width: 0; outline: none; border-bottom: 1px dashed var(--primary-color); }
         .completion-delete { flex: 0 0 18px; width: 18px; height: 18px; padding: 0; border: 0; border-radius: 50%; background: #fdecec; color: var(--danger-color); cursor: pointer; font-size: 12px; font-weight: 900; line-height: 18px; }
@@ -522,7 +526,7 @@
         .day-completion-add input { min-width: 0; flex: 1; padding: 5px 7px; border: 1px dashed #b9d7e9; border-radius: 7px; outline: none; color: var(--text-color); font-size: 11px; }
         .day-completion-add input:focus { border-color: var(--primary-color); }
         .day-completion-add button { flex: 0 0 27px; padding: 0; border: 0; border-radius: 7px; background: var(--primary-color); color: #fff; cursor: pointer; font-weight: 900; }
-        .no-record { color: #788b98; font-size: 11px; }
+        .no-record { color: var(--muted-color); font-size: 11px; }
 
         .toast {
             position: fixed;
@@ -630,11 +634,11 @@
                     <button type="button" class="theme-swatch" data-theme="violet" onclick="setTheme('violet')" title="鸢尾紫" aria-label="鸢尾紫"></button>
                     <button type="button" class="theme-swatch" data-theme="peach" onclick="setTheme('peach')" title="暖杏橙" aria-label="暖杏橙"></button>
                     <button type="button" class="theme-swatch" data-theme="rose" onclick="setTheme('rose')" title="蔷薇粉" aria-label="蔷薇粉"></button>
-                    <button type="button" class="theme-swatch" data-theme="custom" onclick="document.getElementById('background-upload').click()" title="炫彩背景图" aria-label="上传炫彩背景图"></button>
+                    <button type="button" class="theme-swatch" data-theme="custom" onclick="activateCustomTheme()" title="自定义背景" aria-label="使用或上传自定义背景"></button>
                 </div>
                 <div class="theme-opacity-control">
                     <div class="theme-opacity-heading">
-                        <span>信息块透明度</span>
+                        <span>透明度</span>
                         <output class="theme-opacity-value" id="card-opacity-value" for="card-opacity-slider">90%</output>
                     </div>
                     <input type="range" class="theme-opacity-slider" id="card-opacity-slider" min="20" max="100" step="1" value="90" oninput="setCardOpacity(this.value)" aria-label="调整所有页面信息块透明度">
@@ -729,14 +733,14 @@
                     </div>
                     <div class="checkin-item">
                         <div class="checkin-icon" id="icon-pm">⭕</div>
-                        <div class="checkin-name">中午</div>
+                        <div class="checkin-name">下午</div>
                         <div class="checkin-deadline">12:00–15:00</div>
                         <button class="primary-btn" id="btn-pm" onclick="doCheckIn('pm')">打卡</button>
                     </div>
                     <div class="checkin-item">
                         <div class="checkin-icon" id="icon-night">⭕</div>
                         <div class="checkin-name">晚上</div>
-                        <div class="checkin-deadline">18:00–20:00</div>
+                        <div class="checkin-deadline">17:00–20:00</div>
                         <button class="primary-btn" id="btn-night" onclick="doCheckIn('night')">打卡</button>
                     </div>
                 </div>
@@ -1063,7 +1067,7 @@
         };
         const DEFAULT_HEALTH_HABITS = ['sleep', 'meal', 'medicine'];
         const WEEKDAY_NAMES = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'];
-        const CHECKIN_WINDOWS = { am: [360, 600], pm: [720, 900], night: [1080, 1200] };
+        const CHECKIN_WINDOWS = { am: [360, 600], pm: [720, 900], night: [1020, 1200] };
         const WEATHER_CACHE_KEY = 'ddLocalWeatherCacheV1';
         const RECORD_RESET_VERSION = 'cloud-v2-clean-records-2026-09-03-v1';
         const DATA_STORAGE_DEFAULTS = {
@@ -1787,6 +1791,13 @@
             return '#' + rgb.map(channel => Math.round(channel * (1 - whiteRatio) + 255 * whiteRatio).toString(16).padStart(2, '0')).join('');
         }
 
+        function hexWithOpacity(color, opacity) {
+            const value = String(color || '').replace('#', '');
+            if (!/^[0-9a-f]{6}$/i.test(value)) return `rgba(255,255,255,${opacity})`;
+            const channels = [0, 2, 4].map(index => parseInt(value.slice(index, index + 2), 16));
+            return `rgba(${channels.join(',')},${opacity})`;
+        }
+
         async function colorsFromBackground(dataUrl) {
             const image = await loadImageSource(dataUrl);
             const canvas = document.createElement('canvas');
@@ -1829,7 +1840,12 @@
             root.style.setProperty('--shadow', `0 8px 28px ${theme.shadow}`);
             root.style.setProperty('--theme-shadow-color', theme.shadow);
             const cardOpacity = normalizeCardOpacity(appSettings.cardOpacity);
-            root.style.setProperty('--card-bg', `rgba(255,255,255,${cardOpacity / 100})`);
+            const surfaceOpacity = cardOpacity / 100;
+            root.style.setProperty('--surface-opacity', String(surfaceOpacity));
+            root.style.setProperty('--card-bg', `rgba(255,255,255,${surfaceOpacity})`);
+            root.style.setProperty('--white-surface-bg', `rgba(255,255,255,${surfaceOpacity})`);
+            root.style.setProperty('--panel-bg', hexWithOpacity(theme.bg, surfaceOpacity));
+            root.style.setProperty('--soft-surface-bg', hexWithOpacity(theme.soft, surfaceOpacity));
             document.body.classList.toggle('custom-theme', hasCustomTheme);
             document.body.style.backgroundImage = hasCustomTheme
                 ? `linear-gradient(rgba(255,255,255,.2), rgba(255,255,255,.2)), url("${appSettings.customTheme.backgroundImage}")`
@@ -1846,6 +1862,18 @@
             appSettings.theme = themeName;
             saveSettingsData();
             applyTheme();
+        }
+
+        function activateCustomTheme() {
+            const hasSavedBackground = Boolean(appSettings.customTheme?.backgroundImage && appSettings.customTheme?.colors);
+            if (!hasSavedBackground || appSettings.theme === 'custom') {
+                document.getElementById('background-upload').click();
+                return;
+            }
+            appSettings.theme = 'custom';
+            saveSettingsData();
+            applyTheme();
+            showToast('已恢复上次的自定义背景；再次点击可更换图片');
         }
 
         function setCardOpacity(value) {
