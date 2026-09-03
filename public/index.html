@@ -1076,7 +1076,6 @@
         let selectedTaskDate = null;
         let activeDateKey = '';
         let appReady = false;
-        let settingsMigrationPending = false;
         const defaultAppName = document.querySelector('meta[name="app-name"]').content || '点击修改';
         let appSettings = {
             name: defaultAppName,
@@ -1590,11 +1589,6 @@
             healthData = safeJSON(localStorage.getItem('ddHealthData'), {});
             almanacRecords = safeJSON(localStorage.getItem('ddAlmanacRecords'), {});
             appSettings = { ...appSettings, ...safeJSON(localStorage.getItem('ddAppSettings'), {}) };
-            if (['小丁博士', '小王老师', '小帅博士', '小鸡打卡'].includes(appSettings.name)) {
-                appSettings.name = defaultAppName;
-                settingsMigrationPending = true;
-                saveSettingsData();
-            }
             migrateCustomCountdowns();
             migrateHealthHabits();
             migrateSportTypes();
@@ -3146,7 +3140,6 @@
             renderStatsCalendar();
             renderAlmanac(almanacRecords[activeDateKey] || fallbackAlmanac(new Date()));
             appReady = true;
-            if (settingsMigrationPending) saveSettingsData();
             initializeCloudSync();
             loadTodayAlmanac();
             loadLocalWeather();
