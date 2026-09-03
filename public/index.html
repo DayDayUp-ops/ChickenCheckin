@@ -1085,17 +1085,20 @@
         let activeDateKey = '';
         let appReady = false;
         const defaultAppName = document.querySelector('meta[name="app-name"]').content || '点击修改';
-        let appSettings = {
-            name: defaultAppName,
-            customCountdowns: [],
-            theme: 'blue',
-            healthHabits: [...DEFAULT_HEALTH_HABITS],
-            sportTypes: [...DEFAULT_SPORT_TYPES],
-            countdownWeekday: 1,
-            avatarImage: '',
-            customTheme: null,
-            cardOpacity: 90
-        };
+        function createDefaultAppSettings() {
+            return {
+                name: defaultAppName,
+                customCountdowns: [],
+                theme: 'blue',
+                healthHabits: [...DEFAULT_HEALTH_HABITS],
+                sportTypes: [...DEFAULT_SPORT_TYPES],
+                countdownWeekday: 1,
+                avatarImage: '',
+                customTheme: null,
+                cardOpacity: 90
+            };
+        }
+        let appSettings = createDefaultAppSettings();
 
         let checkinStatus = { am: false, pm: false, night: false };
         let stopwatchInterval = null;
@@ -1322,17 +1325,46 @@
             if (!quiet) showToast(error?.message || '云同步暂时不可用，请稍后重试');
         }
 
-        function applyCloudSnapshot(data, revision, reason) {
+        function renderCurrentAppData() {
+            activeDateKey = formatDateKey(new Date());
+            checkinStatus = checkinData[activeDateKey] || { am: false, pm: false, night: false };
+            applyTheme();
+            applyAppName();
+            applyAvatar();
+            updateCountdowns();
+            updateCheckinUI();
+            renderSmallCalendar();
+            renderRecentGoals();
+            renderTodos();
+            renderSportOptions();
+            renderHealth();
+            updateTimerDisplay();
+            updateLifeStatus();
+            renderStatsCalendar();
+            renderAlmanac(almanacRecords[activeDateKey] || fallbackAlmanac(new Date()));
+        }
+
+        function applyCloudSnapshot(data, revision) {
             if (!isValidCloudData(data)) throw new Error('云端数据格式不完整');
             cloudApplying = true;
-            replaceLocalCloudCache(data);
-            cloudRevision = Number(revision || 0);
-            cloudDirty = false;
-            localStorage.setItem(CLOUD_REVISION_KEY, String(cloudRevision));
-            localStorage.removeItem(CLOUD_DIRTY_KEY);
-            setCloudStatus('online', '已采用云端最新记录，正在刷新页面');
-            showToast('已采用云端最新记录');
-            setTimeout(() => location.reload(), 350);
+            try {
+                replaceLocalCloudCache(data);
+                cloudRevision = Number(revision || 0);
+                cloudDirty = false;
+                localStorage.setItem(CLOUD_REVISION_KEY, String(cloudRevision));
+                localStorage.removeItem(CLOUD_DIRTY_KEY);
+                loadData();
+                renderCurrentAppData();
+            } finally {
+                cloudApplying = false;
+            }
+            const normalizedDataChanged = !cloudDataMatchesLocal(data);
+            if (normalizedDataChanged) {
+                cloudDirty = true;
+                localStorage.setItem(CLOUD_DIRTY_KEY, '1');
+                scheduleCloudPush();
+            }
+            setCloudStatus('online', '已采用云端最新记录 · 云端版本 ' + cloudRevision);
         }
 
         async function pushCloudData(force = false) {
@@ -1382,7 +1414,7 @@
                     cloudDirty = true;
                     localStorage.setItem(CLOUD_DIRTY_KEY, '1');
                     const initialized = await pushCloudData(true);
-                    if (initialized) setTimeout(() => location.reload(), 250);
+                    if (initialized) applyCloudSnapshot(emptyData, cloudRevision);
                     return initialized;
                 }
                 if (!isValidCloudData(payload.data)) throw new Error('云端数据格式不完整');
@@ -1392,7 +1424,7 @@
                     cloudDirty = false;
                     localStorage.removeItem(CLOUD_DIRTY_KEY);
                     if (!localMatchesCloud) {
-                        applyCloudSnapshot(payload.data, remoteRevision, 'cloud-authoritative');
+                        applyCloudSnapshot(payload.data, remoteRevision);
                         return true;
                     }
                     cloudRevision = remoteRevision;
@@ -1444,7 +1476,7 @@
                 const uploaded = await pushCloudData(true);
                 if (uploaded) {
                     showToast('注册成功，已创建空白云端记录');
-                    setTimeout(() => location.reload(), 350);
+                    applyCloudSnapshot(createEmptyCloudData(), cloudRevision);
                 }
                 document.getElementById('cloud-password').value = '';
                 document.getElementById('cloud-invite-code').value = '';
@@ -1524,7 +1556,7 @@
             else pullCloudData(false);
         }
 
-        function initializeCloudSync() {
+        async function initializeCloudSync() {
             cloudSession = safeJSON(localStorage.getItem(CLOUD_SESSION_KEY), null);
             cloudRevision = Math.max(0, Number(localStorage.getItem(CLOUD_REVISION_KEY) || 0));
             cloudDirty = false;
@@ -1543,7 +1575,7 @@
             }
             renderCloudPanel();
             setCloudStatus('online', '已登录，正在读取云端最新记录');
-            setTimeout(() => pullCloudData(true, true), 300);
+            await pullCloudData(true, true);
         }
 
         function clearAllRecordsOnce() {
@@ -1612,8 +1644,8 @@
                     showToast('正在将导入数据写入云端…');
                     const uploaded = await pushCloudData(true);
                     if (uploaded) {
-                        showToast('数据已导入并保存到云端，正在刷新页面');
-                        setTimeout(() => window.location.reload(), 500);
+                        applyCloudSnapshot(backup.data, cloudRevision);
+                        showToast('数据已导入并保存到云端');
                     }
                 } catch (_) {
                     showToast('导入失败：请选择由本系统导出的 JSON 备份文件');
@@ -1630,7 +1662,7 @@
             checkinData = safeJSON(localStorage.getItem('ddCheckins'), {});
             healthData = safeJSON(localStorage.getItem('ddHealthData'), {});
             almanacRecords = safeJSON(localStorage.getItem('ddAlmanacRecords'), {});
-            appSettings = { ...appSettings, ...safeJSON(localStorage.getItem('ddAppSettings'), {}) };
+            appSettings = { ...createDefaultAppSettings(), ...safeJSON(localStorage.getItem('ddAppSettings'), {}) };
             migrateCustomCountdowns();
             migrateHealthHabits();
             migrateSportTypes();
@@ -2764,10 +2796,15 @@
                 const yi = String(data['宜'] || '').trim();
                 const ji = String(data['忌'] || '').trim();
                 if (!yi || !ji) throw new Error('宜忌数据不完整');
-                const record = { yi, ji, source: '万年历在线数据 · 已更新', date: key, updatedAt: Date.now() };
-                almanacRecords[key] = record;
-                save('ddAlmanacRecords', almanacRecords);
-                renderAlmanac(record);
+                const existing = almanacRecords[key];
+                const record = { yi, ji, source: '万年历在线数据 · 已更新', date: key, updatedAt: existing?.updatedAt || Date.now() };
+                const changed = !existing || existing.yi !== yi || existing.ji !== ji || existing.source !== record.source;
+                if (changed) {
+                    record.updatedAt = Date.now();
+                    almanacRecords[key] = record;
+                    save('ddAlmanacRecords', almanacRecords);
+                }
+                renderAlmanac(changed ? record : existing);
             } catch (_) {
                 renderAlmanac(almanacRecords[key] || fallbackAlmanac(now));
             } finally {
@@ -3210,7 +3247,7 @@
             loadTodayAlmanac();
         }
 
-        function initialize() {
+        async function initialize() {
             clearAllRecordsOnce();
             loadData();
             activeDateKey = formatDateKey(new Date());
@@ -3231,7 +3268,7 @@
             renderStatsCalendar();
             renderAlmanac(almanacRecords[activeDateKey] || fallbackAlmanac(new Date()));
             appReady = true;
-            initializeCloudSync();
+            await initializeCloudSync();
             loadTodayAlmanac();
             loadLocalWeather();
             setInterval(updateTime, 1000);
