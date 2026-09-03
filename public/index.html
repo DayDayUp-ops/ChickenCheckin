@@ -101,6 +101,11 @@
         .theme-swatch[data-theme="peach"] { background: #e88955; }
         .theme-swatch[data-theme="rose"] { background: #d85d83; }
         .theme-swatch[data-theme="custom"] { background: conic-gradient(#ff4d6d, #ffca3a, #55c97a, #3fa7ff, #8d68db, #ff4d6d); }
+        .theme-opacity-control { margin-top: 10px; padding-top: 9px; border-top: 1px solid var(--border-color); }
+        .theme-opacity-heading { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 6px; color: var(--muted-color); font-size: 11px; }
+        .theme-opacity-value { color: var(--primary-dark); font-weight: 800; font-variant-numeric: tabular-nums; }
+        .theme-opacity-slider { width: 100%; height: 18px; display: block; margin: 0; accent-color: var(--primary-color); cursor: grab; }
+        .theme-opacity-slider:active { cursor: grabbing; }
         .hidden-file-input { display: none; }
 
         .main-content { flex: 1; min-width: 0; padding: 30px 40px 50px; }
@@ -443,7 +448,7 @@
         .mini-month-picker { width: 112px; padding: 3px 5px; border: 0; outline: 0; background: transparent; color: var(--primary-dark); cursor: pointer; font-size: 11px; font-weight: 800; }
         .mini-month-picker::-webkit-calendar-picker-indicator { padding: 4px; border-radius: 50%; background-color: rgba(255,255,255,.72); cursor: pointer; }
 
-        .weather-card { overflow: hidden; background: linear-gradient(180deg, #fff 0%, #fbfdff 100%); }
+        .weather-card { overflow: hidden; background: var(--card-bg); }
         .weather-refresh { width: 27px; height: 27px; padding: 0; border: 1px solid var(--border-color); border-radius: 8px; background: #fff; color: var(--primary-color); cursor: pointer; }
         .weather-refresh:hover { background: var(--primary-soft); }
         .weather-refresh:disabled { color: #aebbc4; cursor: wait; }
@@ -465,7 +470,7 @@
         .weather-source { margin-top: 8px; color: #a7b4bd; font-size: 9px; text-align: right; }
         .weather-loading { min-height: 236px; display: grid; place-items: center; color: var(--muted-color); font-size: 12px; text-align: center; line-height: 1.7; }
         .weather-error-action { margin-top: 9px; padding: 6px 10px; border: 1px solid var(--border-color); border-radius: 8px; background: #fff; color: var(--primary-dark); cursor: pointer; font-size: 11px; }
-        .perpetual-calendar-card { background: linear-gradient(155deg, #fffdf8 0%, #ffffff 58%, #f7fbff 100%); }
+        .perpetual-calendar-card { background: var(--card-bg); }
         .perpetual-date { display: grid; grid-template-columns: 62px 1fr; align-items: center; gap: 13px; margin-bottom: 12px; padding-bottom: 12px; border-bottom: 1px solid #edf1f4; }
         .perpetual-day { width: 62px; height: 62px; display: grid; place-items: center; border-radius: 16px; background: linear-gradient(145deg, #3498db, #247bb6); color: #fff; font-size: 31px; font-weight: 900; box-shadow: 0 8px 18px rgba(52,152,219,.2); }
         .perpetual-solar { color: #536a7a; font-size: 11px; line-height: 1.55; }
@@ -483,7 +488,7 @@
             padding: 10px;
             border: 1px solid var(--border-color);
             border-radius: 12px;
-            background: #fff;
+            background: var(--card-bg);
             box-shadow: 0 3px 11px rgba(52, 152, 219, .045);
             display: flex;
             flex-direction: column;
@@ -626,6 +631,13 @@
                     <button type="button" class="theme-swatch" data-theme="peach" onclick="setTheme('peach')" title="暖杏橙" aria-label="暖杏橙"></button>
                     <button type="button" class="theme-swatch" data-theme="rose" onclick="setTheme('rose')" title="蔷薇粉" aria-label="蔷薇粉"></button>
                     <button type="button" class="theme-swatch" data-theme="custom" onclick="document.getElementById('background-upload').click()" title="炫彩背景图" aria-label="上传炫彩背景图"></button>
+                </div>
+                <div class="theme-opacity-control">
+                    <div class="theme-opacity-heading">
+                        <span>信息块透明度</span>
+                        <output class="theme-opacity-value" id="card-opacity-value" for="card-opacity-slider">90%</output>
+                    </div>
+                    <input type="range" class="theme-opacity-slider" id="card-opacity-slider" min="20" max="100" step="1" value="90" oninput="setCardOpacity(this.value)" aria-label="调整所有页面信息块透明度">
                 </div>
                 <input type="file" class="hidden-file-input" id="background-upload" accept="image/*" onchange="uploadCustomBackground(this.files[0]); this.value=''">
             </div>
@@ -1085,7 +1097,8 @@
             sportTypes: [...DEFAULT_SPORT_TYPES],
             countdownWeekday: 1,
             avatarImage: '',
-            customTheme: null
+            customTheme: null,
+            cardOpacity: 90
         };
 
         let checkinStatus = { am: false, pm: false, night: false };
@@ -1593,6 +1606,7 @@
             migrateHealthHabits();
             migrateSportTypes();
             migrateCountdownWeekday();
+            migrateCardOpacity();
             migrateStoredData();
         }
 
@@ -1614,6 +1628,19 @@
             const weekday = Number(appSettings.countdownWeekday);
             if (!Number.isInteger(weekday) || weekday < 0 || weekday > 6) {
                 appSettings.countdownWeekday = 1;
+                saveSettingsData();
+            }
+        }
+
+        function normalizeCardOpacity(value) {
+            const opacity = Number(value);
+            return Number.isFinite(opacity) ? Math.min(100, Math.max(20, Math.round(opacity))) : 90;
+        }
+
+        function migrateCardOpacity() {
+            const opacity = normalizeCardOpacity(appSettings.cardOpacity);
+            if (appSettings.cardOpacity !== opacity) {
+                appSettings.cardOpacity = opacity;
                 saveSettingsData();
             }
         }
@@ -1801,17 +1828,28 @@
             root.style.setProperty('--border-color', theme.border);
             root.style.setProperty('--shadow', `0 8px 28px ${theme.shadow}`);
             root.style.setProperty('--theme-shadow-color', theme.shadow);
-            root.style.setProperty('--card-bg', hasCustomTheme ? 'rgba(255,255,255,.9)' : '#ffffff');
+            const cardOpacity = normalizeCardOpacity(appSettings.cardOpacity);
+            root.style.setProperty('--card-bg', `rgba(255,255,255,${cardOpacity / 100})`);
             document.body.classList.toggle('custom-theme', hasCustomTheme);
             document.body.style.backgroundImage = hasCustomTheme
                 ? `linear-gradient(rgba(255,255,255,.2), rgba(255,255,255,.2)), url("${appSettings.customTheme.backgroundImage}")`
                 : '';
             document.querySelectorAll('.theme-swatch').forEach(button => button.classList.toggle('active', button.dataset.theme === themeName));
+            const opacitySlider = document.getElementById('card-opacity-slider');
+            const opacityValue = document.getElementById('card-opacity-value');
+            if (opacitySlider) opacitySlider.value = String(cardOpacity);
+            if (opacityValue) opacityValue.textContent = `${cardOpacity}%`;
         }
 
         function setTheme(themeName) {
             if (!THEMES[themeName]) return;
             appSettings.theme = themeName;
+            saveSettingsData();
+            applyTheme();
+        }
+
+        function setCardOpacity(value) {
+            appSettings.cardOpacity = normalizeCardOpacity(value);
             saveSettingsData();
             applyTheme();
         }
