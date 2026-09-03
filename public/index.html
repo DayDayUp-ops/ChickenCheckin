@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="app-name" content="小鸡打卡">
-    <meta name="app-version" content="3.0-preview">
+    <meta name="app-name" content="点击修改">
+    <meta name="app-version" content="1.04">
     <link rel="icon" type="image/png" href="app-logo.png">
-    <title>小鸡打卡自律打卡系统</title>
+    <title>ChickenCheckin</title>
     <style>
         :root {
             --primary-color: #3498db;
@@ -609,7 +609,7 @@
             </button>
             <input type="file" class="hidden-file-input" id="avatar-upload" accept="image/*" onchange="uploadAvatar(this.files[0]); this.value=''">
             <div class="logo" id="editable-logo" onclick="editAppName()" title="点击修改名称并同步">
-                <span id="app-name">小鸡打卡</span><br>
+                <span id="app-name">点击修改</span><br>
                 <span class="logo-subtitle">自律打卡系统</span>
             </div>
         </div>
@@ -1077,7 +1077,7 @@
         let activeDateKey = '';
         let appReady = false;
         let settingsMigrationPending = false;
-        const defaultAppName = document.querySelector('meta[name="app-name"]').content || '小鸡打卡';
+        const defaultAppName = document.querySelector('meta[name="app-name"]').content || '点击修改';
         let appSettings = {
             name: defaultAppName,
             customCountdowns: [],
@@ -1590,7 +1590,7 @@
             healthData = safeJSON(localStorage.getItem('ddHealthData'), {});
             almanacRecords = safeJSON(localStorage.getItem('ddAlmanacRecords'), {});
             appSettings = { ...appSettings, ...safeJSON(localStorage.getItem('ddAppSettings'), {}) };
-            if (['小丁博士', '小王老师', '小帅博士'].includes(appSettings.name)) {
+            if (['小丁博士', '小王老师', '小帅博士', '小鸡打卡'].includes(appSettings.name)) {
                 appSettings.name = defaultAppName;
                 settingsMigrationPending = true;
                 saveSettingsData();
@@ -1669,8 +1669,7 @@
         function applyAppName() {
             const name = appSettings.name || defaultAppName;
             document.getElementById('app-name').textContent = name;
-            document.title = `${name}自律打卡系统`;
-            document.querySelector('meta[name="app-name"]').setAttribute('content', name);
+            document.title = 'ChickenCheckin';
         }
 
         function applyAvatar() {
@@ -1852,7 +1851,7 @@
             appSettings.name = trimmed;
             saveSettingsData();
             applyAppName();
-            showToast('名称和标签页已更新并将自动同步');
+            showToast('名称已更新并将自动同步');
         }
 
         function updateTime() {

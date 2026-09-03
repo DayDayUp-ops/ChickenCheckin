@@ -33,7 +33,7 @@ if (!html.includes('id="cloud-reset-panel"') || !html.includes('placeholder="至
   throw new Error('Cloud password recovery UI is missing from the Pages output.');
 }
 if (!html.includes('id="avatar-upload"') || !html.includes('id="background-upload"') || !html.includes('SPORT_OPTIONS')) {
-  throw new Error('3.0 personalization UI is missing from the Pages output.');
+  throw new Error('Personalization UI is missing from the Pages output.');
 }
 
 const worker = await readFile(resolve(outputDir, '_worker.js'), 'utf8');
